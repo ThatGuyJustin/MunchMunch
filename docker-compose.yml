@@ -1,0 +1,74 @@
+version: '3.9'
+
+services:
+  # Main Web Service
+  # PHP, Nginx Web Server
+  web:
+    image: trafex/php-nginx:latest
+    ports:
+      - 80:8080
+    volumes:
+      - "./web/html:/var/www/html"
+      - "./cfg/nginx-config.cgf:/etc/nginx/conf.d/server.conf"
+      - "./cfg/php-fpm-settings.conf:/etc/php83/php-fpm.d/server.conf"
+  # Main Backend API
+  # Python
+  backend:
+    image: munchmunch/backend
+    build:
+      context: api
+      dockerfile: ./DOCKERFILE
+    volumes:
+      - "./api:/app"
+    ports:
+      - 5069:5000
+    environment:
+      DATABASE_NAME: "MunchMunch"
+      DATABASE_HOST: "main_database"
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "BestPasswordEver69"
+  # Relational Database
+  # Postgresql (Users, other basic information)
+  main_database:
+    image: postgres:latest
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: "BestPasswordEver69"
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./data/postgresql:/var/lib/postgresql/data"
+  # NoSQL Database
+  # MongoDB (Post, and other block data)
+  post_database:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - "./data/mongodb:/data/db"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: BestPasswordEver69
+  # Postgresql Web UI
+  # Used for viewing and modifying data within postgres.
+  main_database_ui:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@foodtok.io"
+      PGADMIN_DEFAULT_PASSWORD: "BestPasswordEver69"
+    ports:
+      - "6969:80"
+  # MongoDB Web UI
+  # Used for viewing and modifying data within mongo. 
+  post_database_ui:
+    image: mongo-express
+    restart: unless-stopped
+    ports:
+      - 8082:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "admin"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "BestPasswordEver69"
+      ME_CONFIG_MONGODB_URL: mongodb://admin:BestPasswordEver69@post_database:27017/

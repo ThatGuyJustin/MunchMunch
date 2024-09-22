@@ -4,9 +4,9 @@ from playhouse.postgres_ext import PostgresqlExtDatabase
 
 postgres_db = PostgresqlExtDatabase(
     os.getenv("DATABASE_NAME", "MunchMunch"),
-    host=os.getenv("DATABASE_HOST", "192.168.1.11"),
+    host=os.getenv("DATABASE_HOST", "localhost"),
     user=os.getenv("DATABASE_USER", "postgres"),
-    password=os.getenv("DATABASE_PASSWORD", "BigTitties"),
+    password=os.getenv("DATABASE_PASSWORD", "password"),
 )
 
 REGISTERED_MODELS = []

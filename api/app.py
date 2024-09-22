@@ -55,4 +55,4 @@ def register():
 
 if __name__ == '__main__':
     app.register_blueprint(api, url_prefix='/api')
-    app.run()
+    app.run(host="0.0.0.0", debug=True)

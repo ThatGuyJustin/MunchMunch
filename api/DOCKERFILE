@@ -1,0 +1,18 @@
+FROM duffn/python-poetry:3.12.0-slim
+
+COPY pyproject.toml poetry.lock ./
+# Poetry is installed with `pip`, so active our virtual environmentn and install projects dependecies there, so they don't conflict with poetry's dependencies.
+RUN . $VENV_PATH/bin/activate && $POETRY_HOME/poetry install --no-root
+
+WORKDIR /app
+COPY . .
+
+# Our user has an ID of 10000 and the group an ID of 10001.
+RUN chown 10000:10001 -R /app
+
+# Our non-root user.
+USER nonroot
+
+# Use `tini` to start our container.
+ENTRYPOINT ["tini", "--"]
+CMD ["./entry-point.sh"]
