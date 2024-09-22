@@ -9,8 +9,8 @@ services:
       - 80:8080
     volumes:
       - "./web/html:/var/www/html"
-      - "./cfg/nginx-config.cgf:/etc/nginx/conf.d/server.conf"
-      - "./cfg/php-fpm-settings.conf:/etc/php83/php-fpm.d/server.conf"
+      - "./cfg/nginx:/etc/nginx/conf.d"
+      - "./cfg/php-fpm-settings:/etc/php83/php-fpm.d"
   # Main Backend API
   # Python
   backend:
