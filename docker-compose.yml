@@ -27,6 +27,7 @@ services:
       DATABASE_HOST: "main_database"
       DATABASE_USER: "postgres"
       DATABASE_PASSWORD: "BestPasswordEver69"
+      JWT_SECRET_KEY: "SomethingSuperSecure?"
   # Relational Database
   # Postgresql (Users, other basic information)
   main_database:
