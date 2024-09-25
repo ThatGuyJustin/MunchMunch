@@ -3,7 +3,7 @@ session_start();
 
 // Check if the user is already logged in
 if (isset($_SESSION['user_id'])) {
-    header('Location: index.php');
+    header('Location: dashboard.php'); 
     exit();
 }
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     // Flask backend URL for login
-    $api_url = 'http://backend:5069/api'; // Adjust the URL to your backend service
+    $api_url = 'http://backend:5000/api/login'; 
 
     // Initialize cURL
     $ch = curl_init($api_url);
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Store user data in session on successful login
             $_SESSION['user_id'] = $result['user']['id'];
             $_SESSION['username'] = $result['user']['username'];
-            header('Location: index.php');
+            header('Location: dashboard.php'); 
             exit();
         } else {
             $error_message = isset($result['msg']) ? $result['msg'] : 'Invalid username or password.';
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login to FoodTinder</title>
+    <title>Login - FoodTinder</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
