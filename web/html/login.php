@@ -17,12 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Prepare data for API request
     $data = [
-        'username' => $username,
+        'login' => $username,
         'password' => $password,
     ];
 
     // Flask backend URL for login
-    $api_url = 'http://backend:5000/api/login'; 
+    $api_url = $_SERVER['HTTP_HOST'] . "/api/register";
 
     // Initialize cURL
     $ch = curl_init($api_url);
