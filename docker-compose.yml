@@ -6,11 +6,15 @@ services:
   web:
     image: trafex/php-nginx:latest
     ports:
-      - 80:8080
+      - 80:80
     volumes:
       - "./web/html:/var/www/html"
       - "./cfg/nginx:/etc/nginx/conf.d"
       - "./cfg/php-fpm-settings:/etc/php83/php-fpm.d"
+    depends_on:
+      backend:
+        condition: service_started
+        restart: true
   # Main Backend API
   # Python
   backend:
@@ -18,6 +22,10 @@ services:
     build:
       context: api
       dockerfile: ./DOCKERFILE
+    depends_on:
+      main_database:
+        condition: service_healthy
+        restart: true
     volumes:
       - "./api:/app"
     ports:
@@ -27,6 +35,7 @@ services:
       DATABASE_HOST: "main_database"
       DATABASE_USER: "postgres"
       DATABASE_PASSWORD: "BestPasswordEver69"
+      JWT_SECRET_KEY: "SomethingSuperSecure?"
   # Relational Database
   # Postgresql (Users, other basic information)
   main_database:
@@ -35,10 +44,18 @@ services:
     shm_size: 128mb
     environment:
       POSTGRES_PASSWORD: "BestPasswordEver69"
+      POSTGRES_DB: "MunchMunch"
+      POSTGRES_USER: "postgres"
     ports:
       - "5432:5432"
     volumes:
       - "./data/postgresql:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
   # NoSQL Database
   # MongoDB (Post, and other block data)
   post_database:
