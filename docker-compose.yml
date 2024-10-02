@@ -36,6 +36,8 @@ services:
       DATABASE_USER: "postgres"
       DATABASE_PASSWORD: "BestPasswordEver69"
       JWT_SECRET_KEY: "SomethingSuperSecure?"
+      SECURE_PASSSWORD_SALT: "SomethingSuperSecure?"
+      REQUIRE_CONFIRMATION: true
   # Relational Database
   # Postgresql (Users, other basic information)
   main_database:

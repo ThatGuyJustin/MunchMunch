@@ -1,17 +1,19 @@
 import os
 
 import jwt
-from flask import Flask, Blueprint, request
+from flask import Flask, Blueprint, request, current_app
 from peewee import fn
 
 from db import init_db
 from models.user import Users
+from routes.user import user_api
 from util.auth import encrypt_password, authed
 from util.validation import validate_username, validate_email
 
 app = Flask(__name__)
 JWT_SECRET = os.environ.get('JWT_SECRET_KEY') or "SomethingSuperSecure?"
 app.config['JWT_SECRET_KEY'] = JWT_SECRET
+app.config['REQUIRE_CONFIRMATION'] = bool(os.environ.get('REQUIRE_CONFIRMATION')) or False
 
 api = Blueprint('api', __name__)
 
@@ -34,15 +36,15 @@ def user_list():
         return {'code': 500, "msg": e.with_traceback()}, 500
 
 
-@api.get("/user/<uid>")
-@authed
-def get_user_by_id(uid):
-    user = Users.get_or_none(id=uid)
-    return {
-        'code': 200 if user else 404,
-        'data': user.to_dict(),
-        'msg': "User found" if user else "User not found"
-    }, 200 if user else 404
+# @api.get("/user/<uid>")
+# @authed
+# def get_user_by_id(uid):
+#     user = Users.get_or_none(id=uid)
+#     return {
+#         'code': 200 if user else 404,
+#         'data': user.to_dict(),
+#         'msg': "User found" if user else "User not found"
+#     }, 200 if user else 404
 
 
 @api.post("/register")
@@ -69,8 +71,12 @@ def register():
     # TODO: Password validation /shrug
 
     user = Users.create(username=data["username"], email=data["email"], password=encrypt_password(data["password"]))
+    print(current_app.config["REQUIRE_CONFIRMATION"])
+    if current_app.config["REQUIRE_CONFIRMATION"]:
+        user.account_flags.append("PENDING_CONFIRMATION")
+        user.save()
 
-    return {"code": 200, "msg": "Registration validated :)", "user": user.to_dict()}, 200
+    return {"code": 200, "msg": "Registration Successful. :)", "user": user.to_dict()}, 200
 
 
 @api.post("/login")
@@ -114,4 +120,5 @@ def login():
 
 if __name__ == '__main__':
     app.register_blueprint(api, url_prefix='/api')
+    app.register_blueprint(user_api, url_prefix='/api/users')
     app.run(host="0.0.0.0", debug=True)
