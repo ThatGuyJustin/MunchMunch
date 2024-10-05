@@ -14,6 +14,7 @@ app = Flask(__name__)
 JWT_SECRET = os.environ.get('JWT_SECRET_KEY') or "SomethingSuperSecure?"
 app.config['JWT_SECRET_KEY'] = JWT_SECRET
 app.config['REQUIRE_CONFIRMATION'] = bool(os.environ.get('REQUIRE_CONFIRMATION')) or False
+app.config['SECURE_PASSSWORD_SALT'] = os.environ.get('SECURE_PASSSWORD_SALT') or "SomethingSuperSecure?"
 
 api = Blueprint('api', __name__)
 
@@ -71,10 +72,12 @@ def register():
     # TODO: Password validation /shrug
 
     user = Users.create(username=data["username"], email=data["email"], password=encrypt_password(data["password"]))
-    print(current_app.config["REQUIRE_CONFIRMATION"])
     if current_app.config["REQUIRE_CONFIRMATION"]:
         user.account_flags.append("PENDING_CONFIRMATION")
         user.save()
+        # Generate Validation Code
+
+
 
     return {"code": 200, "msg": "Registration Successful. :)", "user": user.to_dict()}, 200
 
