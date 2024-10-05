@@ -1,7 +1,7 @@
 import re
 
-from peewee import AutoField, TextField
-from playhouse.postgres_ext import ArrayField
+from peewee import AutoField, TextField, IntegerField
+from playhouse.postgres_ext import ArrayField, JSONField
 from werkzeug.security import check_password_hash
 
 from db import PostgresBase
@@ -18,15 +18,20 @@ class Users(PostgresBase):
     username = TextField(unique=True)
     email = TextField(unique=True)
     account_flags = ArrayField(TextField, default=[])
-    liked_posts = ArrayField(TextField, default=[])
+    favorite_posts = ArrayField(TextField, default=[])
     password = TextField()
+    avatar = TextField(null=True)
+    following = ArrayField(IntegerField, default=[])
+    followers = ArrayField(IntegerField, default=[])
+    preferences = JSONField(null=True)
 
     def to_dict(self):
-        base = {"id": self.id, "username": self.username, "email": self.email}
+        base = {"id": self.id, "username": self.username, "email": self.email, "avatar": self.avatar or "default.png",
+                'following': self.following, 'followers': self.followers, 'preferences': self.preferences}
         if self.account_flags:
             base["account_flags"] = self.account_flags
-        if self.liked_posts:
-            base["liked_posts"] = self.liked_posts
+        if self.favorite_posts:
+            base["liked_posts"] = self.favorite_posts
         return base
 
     @classmethod

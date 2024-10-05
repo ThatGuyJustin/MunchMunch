@@ -1,4 +1,6 @@
 import os
+
+from mongoengine import connect
 from peewee import Model, OP
 from playhouse.postgres_ext import PostgresqlExtDatabase
 
@@ -8,6 +10,8 @@ postgres_db = PostgresqlExtDatabase(
     user=os.getenv("DATABASE_USER", "postgres"),
     password=os.getenv("DATABASE_PASSWORD", "password"),
 )
+
+mongodb = connect(host=os.getenv("MONGODB_URI", "mongodb://posts_database:27017/MunchMunch"))
 
 REGISTERED_MODELS = []
 
