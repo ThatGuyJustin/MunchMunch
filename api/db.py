@@ -11,7 +11,7 @@ postgres_db = PostgresqlExtDatabase(
     password=os.getenv("DATABASE_PASSWORD", "password"),
 )
 
-mongodb = connect(host=os.getenv("MONGODB_URI", "mongodb://posts_database:27017/MunchMunch"))
+mongodb = connect(db="MunchMunch", host=os.getenv("MONGODB_URI", "mongodb://admin:BestPasswordEver69@post_database:27017/"))
 
 REGISTERED_MODELS = []
 

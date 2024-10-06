@@ -28,10 +28,10 @@ def get_user_by_id(user, uid):
 def delete_user(user, uid):
     if 'ADMIN' not in user.account_flags:
         return {
-            'code': 401,
+            'code': 403,
             'data': None,
             'msg': 'Forbidden'
-        }, 401
+        }, 403
     to_remove = Users.get_or_none(id=uid)
     if to_remove:
         Users.delete_by_id(id=to_remove.id)

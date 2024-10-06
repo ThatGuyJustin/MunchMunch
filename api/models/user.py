@@ -16,6 +16,7 @@ class Users(PostgresBase):
 
     id = AutoField()
     username = TextField(unique=True)
+    name = TextField(null=True)
     email = TextField(unique=True)
     account_flags = ArrayField(TextField, default=[])
     favorite_posts = ArrayField(TextField, default=[])
@@ -26,12 +27,12 @@ class Users(PostgresBase):
     preferences = JSONField(null=True)
 
     def to_dict(self):
-        base = {"id": self.id, "username": self.username, "email": self.email, "avatar": self.avatar or "default.png",
+        base = {"id": self.id, "username": self.username, "name": self.name or self.username, "email": self.email, "avatar": self.avatar or "default.png",
                 'following': self.following, 'followers': self.followers, 'preferences': self.preferences}
         if self.account_flags:
             base["account_flags"] = self.account_flags
         if self.favorite_posts:
-            base["liked_posts"] = self.favorite_posts
+            base["favorite_posts"] = self.favorite_posts
         return base
 
     @classmethod

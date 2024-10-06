@@ -95,6 +95,13 @@ services:
       main_database:
           condition: service_healthy
           restart: true
+    volumes:
+      - type: bind
+        source: "./cfg/pgadmin/preferences.json"
+        target: "/pgadmin4/preferences.json"
+      - type: bind
+        source: "./cfg/pgadmin/servers.json"
+        target: "/pgadmin4/servers.json"
     environment:
       PGADMIN_DEFAULT_EMAIL: "admin@foodtok.io"
       PGADMIN_DEFAULT_PASSWORD: "BestPasswordEver69"
@@ -114,7 +121,9 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: "admin"
       ME_CONFIG_MONGODB_ADMINPASSWORD: "BestPasswordEver69"
-      ME_CONFIG_MONGODB_URL: mongodb://admin:BestPasswordEver69@post_database:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: "admin"
+      ME_CONFIG_BASICAUTH_PASSWORD: "BestPasswordEver69"
+      ME_CONFIG_MONGODB_SERVER: post_database
   # S3 Object storage
   # Used for profile pictures, recipe pictures/videos, and other files that need to be shared.
   s3storage:
