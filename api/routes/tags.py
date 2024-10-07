@@ -19,7 +19,7 @@ def get_tags():
     return [q.to_dict() for q in query], 200
 
 
-@tags.route("/tag_testing", methods=["GET", "POST"])
+@tags.route("/testing", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
         print(request.form.to_dict().items())
@@ -55,10 +55,10 @@ def upload_file():
         <body>
           <h1>Create Tag</h1>
           <form method=post enctype=multipart/form-data>
-            ID <input type=text name=id value="{tag_to_modify.get('id', '')}" readonly>
-            Label <input type=text name=label value="{tag_to_modify.get('label', "")}">
-            Emoji <input type=text name=emoji value="{tag_to_modify.get('emoji', "")}">
-            Color <input type=text name=color value="{tag_to_modify.get('color', "")}">
+            ID <input type=text name=id value="{tag_to_modify.get('id', '')}" readonly><br>
+            Label <input type=text name=label value="{tag_to_modify.get('label', "")}"><br>
+            Emoji <input type=text name=emoji value="{tag_to_modify.get('emoji', "")}"><br>
+            Color <input type=text name=color value="{tag_to_modify.get('color', "")}"><br>
             <input type=submit value=Create/Edit>
           </form>
         </body>

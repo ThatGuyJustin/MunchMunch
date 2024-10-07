@@ -11,10 +11,10 @@ from werkzeug.utils import secure_filename
 
 from db import init_db, postgres_db
 from models.user import Users
+from routes.user import users as users_api
 from routes.media import media
 from routes.recipes import recipes
 from routes.tags import tags
-from routes.user import user_api
 from util.auth import encrypt_password, authed
 from util.files import allowed_file, upload_object
 from util.validation import validate_username, validate_email
@@ -150,8 +150,6 @@ def register():
         user.save()
         # Generate Validation Code
 
-
-
     return {"code": 200, "msg": "Registration Successful. :)", "user": user.to_dict()}, 200
 
 
@@ -196,7 +194,7 @@ def login():
 
 if __name__ == '__main__':
     app.register_blueprint(api, url_prefix='/api')
-    app.register_blueprint(user_api, url_prefix='/api/users')
+    app.register_blueprint(users_api, url_prefix='/api/users')
     app.register_blueprint(media, url_prefix='/api/media')
     app.register_blueprint(tags, url_prefix='/api/tags')
     app.register_blueprint(recipes, url_prefix='/api/recipes')
