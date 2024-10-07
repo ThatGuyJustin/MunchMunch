@@ -62,32 +62,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-image: url('background-image.jpg'); /* Add your image URL here */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: top left;
+            background-attachment: fixed;
+            animation: slideBackground 30s linear infinite; /* Adds the animation */
+            margin: 0;
+            padding: 0;
         }
+
+        /* Keyframes for scrolling background side to side */
+        @keyframes slideBackground {
+            0% {
+                background-position: top left;
+            }
+            50% {
+                background-position: top right;
+            }
+            100% {
+                background-position: top left;
+            }
+        }
+
         .container {
             width: 400px;
             margin: 100px auto;
             padding: 20px;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.8);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         h1 {
             font-size: 32px;
             text-align: center;
             margin-bottom: 20px;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
         }
+
         .form-group input {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
         }
+
         .form-group button {
             width: 100%;
             padding: 10px;
@@ -97,45 +123,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
             font-size: 16px;
         }
-        .register-link {
-            margin-top: 15px;
-            text-align: center;
-        }
-        .register-link a {
-            color: #007bff;
-            text-decoration: none;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Login to FoodTinder</h1>
+    <h1>Login to MunchMunch</h1>
 
     <div class="form-group">
         <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Enter your username">
+        <input type="text" id="username" name="username" placeholder="Enter your username" required>
     </div>
     <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter your password">
+        <input type="password" id="password" name="password" placeholder="Enter your password" required>
     </div>
     <div class="form-group">
-        <button onclick="loginUser()">Log In</button>
-    </div>
-
-    <!-- Link to the registration page -->
-    <div class="register-link">
-        <p>Don't have an account? <a href="register.php">Register here</a></p>
+        <button type="submit" formmethod="POST">Log In</button>
     </div>
 </div>
-
-<script>
-    function loginUser() {
-        alert("Login button clicked!");
-        // Implement your login logic here
-    }
-</script>
 
 </body>
 </html>
