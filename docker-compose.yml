@@ -26,6 +26,12 @@ services:
       main_database:
         condition: service_healthy
         restart: true
+      s3storage:
+        condition: service_healthy
+        restart: true
+      post_database:
+        condition: service_healthy
+        restart: true
     volumes:
       - "./api:/app"
     ports:
@@ -36,10 +42,16 @@ services:
       DATABASE_USER: "postgres"
       DATABASE_PASSWORD: "BestPasswordEver69"
       JWT_SECRET_KEY: "SomethingSuperSecure?"
+      SECURE_PASSSWORD_SALT: "SomethingSuperSecure?"
+      REQUIRE_CONFIRMATION: true
+      S3_USERNAME: "admin"
+      S3_PASSWORD: "BestPasswordEver69"
+      S3_BUCKET: "munchmunch"
+      S3_HOST: "s3storage:9000"
   # Relational Database
   # Postgresql (Users, other basic information)
   main_database:
-    image: postgres:latest
+    image: postgres:16
     restart: always
     shm_size: 128mb
     environment:
@@ -68,11 +80,28 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: BestPasswordEver69
+    healthcheck: 
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 60s
+      retries: 3
+      start_period: 20s
   # Postgresql Web UI
   # Used for viewing and modifying data within postgres.
   main_database_ui:
     image: dpage/pgadmin4:latest
     restart: always
+    depends_on:
+      main_database:
+          condition: service_healthy
+          restart: true
+    volumes:
+      - type: bind
+        source: "./cfg/pgadmin/preferences.json"
+        target: "/pgadmin4/preferences.json"
+      - type: bind
+        source: "./cfg/pgadmin/servers.json"
+        target: "/pgadmin4/servers.json"
     environment:
       PGADMIN_DEFAULT_EMAIL: "admin@foodtok.io"
       PGADMIN_DEFAULT_PASSWORD: "BestPasswordEver69"
@@ -83,9 +112,33 @@ services:
   post_database_ui:
     image: mongo-express
     restart: unless-stopped
+    depends_on:
+      post_database:
+          condition: service_healthy
+          restart: true
     ports:
       - 8082:8081
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: "admin"
       ME_CONFIG_MONGODB_ADMINPASSWORD: "BestPasswordEver69"
-      ME_CONFIG_MONGODB_URL: mongodb://admin:BestPasswordEver69@post_database:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: "admin"
+      ME_CONFIG_BASICAUTH_PASSWORD: "BestPasswordEver69"
+      ME_CONFIG_MONGODB_SERVER: post_database
+  # S3 Object storage
+  # Used for profile pictures, recipe pictures/videos, and other files that need to be shared.
+  s3storage:
+    image: quay.io/minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: "admin"
+      MINIO_ROOT_PASSWORD: "BestPasswordEver69"
+    volumes:
+      - "./data/minio/data:/data"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

@@ -11,6 +11,15 @@ class Tags(PostgresBase):
 
     id = AutoField()
     label = TextField(unique=True)
-    emoji = TextField(unique=False)
-    color = TextField(unique=False)
-    constraints = ArrayField(TextField())
+    emoji = TextField(unique=False, null=True)
+    color = TextField(unique=False, null=True)
+    constraints = ArrayField(TextField, default=[])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'label': self.label,
+            'emoji': self.emoji,
+            'color': self.color,
+            'constraints': self.constraints
+        }

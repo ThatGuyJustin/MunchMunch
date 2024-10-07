@@ -4,6 +4,8 @@ from flask import request, abort
 from flask import current_app
 from werkzeug.security import generate_password_hash
 
+from models.user import Users
+
 
 def encrypt_password(password):
     return generate_password_hash(password)
@@ -14,7 +16,9 @@ def authed(f):
     def decorated(*args, **kwargs):
         token = None
         if "Authorization" in request.headers:
-            token = request.headers["Authorization"].split(" ")[1]
+            print(request.headers["Authorization"])
+            # token = request.headers["Authorization"].split(" ")[1]
+            token = request.headers["Authorization"]
         if not token:
             return {
                 "message": "Missing Authorization Token",
@@ -22,8 +26,8 @@ def authed(f):
                 "error": "Unauthorized"
             }, 401
         try:
-            data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
-            current_user = None
+            data = jwt.decode(token, current_app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
+            current_user = Users.get_or_none(id=data["user_id"])
 
             if current_user is None:
                 return {
@@ -31,7 +35,7 @@ def authed(f):
                     "data": None,
                     "error": "Unauthorized"
                 }, 401
-            if not current_user["active"]:
+            if "DISABLED" in current_user.account_flags:
                 abort(403)
         except Exception as e:
             return {
