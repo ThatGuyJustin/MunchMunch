@@ -20,5 +20,6 @@ jobs:
             docker compose down
             git reset --hard
             git pull
+            chmod 755 api/entry-point.sh
             docker compose -f production.yml build --no-cache
             docker compose -f production.yml up -d
