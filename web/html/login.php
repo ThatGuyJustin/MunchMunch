@@ -3,7 +3,7 @@ session_start();
 
 // Check if the user is already logged in
 if (isset($_SESSION['user_id'])) {
-    header('Location: dashboard.php'); 
+    header('Location: dashboard.php');
     exit();
 }
 
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Store user data in session on successful login
             $_SESSION['user_id'] = $result['user']['id'];
             $_SESSION['username'] = $result['user']['username'];
-            header('Location: dashboard.php'); 
+            header('Location: dashboard.php');
             exit();
         } else {
             $error_message = isset($result['msg']) ? $result['msg'] : 'Invalid username or password.';
@@ -57,26 +57,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - FoodTinder</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MunchMunch - Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .register-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .register-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Login</h1>
 
-    <?php if (!empty($error_message)): ?>
-        <p class="error"><?php echo htmlspecialchars($error_message); ?></p>
-    <?php endif; ?>
+<div class="container">
+    <h1>Login to FoodTinder</h1>
 
-    <form action="login.php" method="post">
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required><br>
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter your username">
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password">
+    </div>
+    <div class="form-group">
+        <button onclick="loginUser()">Log In</button>
+    </div>
 
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" required><br>
+    <!-- Link to the registration page -->
+    <div class="register-link">
+        <p>Don't have an account? <a href="register.php">Register here</a></p>
+    </div>
+</div>
 
-        <input type="submit" value="Login">
-    </form>
+<script>
+    function loginUser() {
+        alert("Login button clicked!");
+        // Implement your login logic here
+    }
+</script>
 
-    <p>Don't have an account? <a href="register.php">Register here</a>.</p>
 </body>
 </html>

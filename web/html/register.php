@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     // Flask backend URL for registration
-    $api_url = 'http://backend:5000/api/register'; 
+    $api_url = 'http://backend:5000/api/register';
 
     // Initialize cURL
     $ch = curl_init($api_url);
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Registration successful, redirect to welcome page
             $_SESSION['user_id'] = $result['user']['id'];
             $_SESSION['username'] = $result['user']['username'];
-            header('Location: welcome.php'); 
+            header('Location: welcome.php');
             exit();
         } else {
             $error_message = isset($result['msg']) ? $result['msg'] : 'Registration failed.';
@@ -54,121 +54,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - FoodTinder</title>
+    <title>MunchMunch - Register</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            color: #343a40;
-            margin: 0;
-            padding: 0;
+            background-color: #f0f0f0;
         }
-
         .container {
-            max-width: 400px;
-            margin: 50px auto;
+            width: 400px;
+            margin: 100px auto;
             padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
         h1 {
-            text-align: center;
-            color: #007bff;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            transition: border-color 0.3s;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            color: #ffffff;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
-        }
-
-        .error {
-            color: #dc3545;
+            font-size: 32px;
             text-align: center;
             margin-bottom: 20px;
         }
-
-        p {
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .login-link {
+            margin-top: 15px;
             text-align: center;
         }
-
-        a {
+        .login-link a {
             color: #007bff;
             text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Register</h1>
 
-        <?php if (!empty($error_message)): ?>
-            <p class="error"><?php echo htmlspecialchars($error_message); ?></p>
-        <?php endif; ?>
+<div class="container">
+    <h1>Create a FoodTinder Account</h1>
 
-        <form action="register.php" method="post">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" name="username" id="username" required>
-            </div>
+    <?php if (!empty($error_message)): ?>
+        <p style="color: red; text-align: center;"><?php echo $error_message; ?></p>
+    <?php endif; ?>
 
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" name="email" id="email" required>
-            </div>
+    <form method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <div class="form-group">
+            <button type="submit">Register</button>
+        </div>
+    </form>
 
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" name="password" id="password" required>
-            </div>
-
-            <input type="submit" class="btn" value="Register">
-        </form>
-
-        <p>Already have an account? <a href="login.php">Login here</a>.</p>
+    <!-- Link to the login page -->
+    <div class="login-link">
+        <p>Already have an account? <a href="login.php">Log in here</a></p>
     </div>
+</div>
+
 </body>
 </html>
-

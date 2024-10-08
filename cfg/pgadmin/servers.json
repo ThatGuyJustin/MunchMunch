@@ -1,0 +1,13 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "MunchMunch",
+            "Group": "Development",
+            "Port": 5432,
+            "Username": "postgres",
+            "Host": "main_database",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "postgres"
+        }
+    }
+}
