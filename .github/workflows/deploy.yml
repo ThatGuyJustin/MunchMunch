@@ -1,0 +1,25 @@
+name: Deploy to Production
+
+on:
+  release:
+    types: [published]
+  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Stack
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USERNAME }}
+          key: ${{ secrets.PROD_SSH_SECRET }}
+          port: ${{ secrets.PROD_SSH_PORT }}
+          script: |
+            cd /opt/munchmunch
+            docker compose down
+            git reset --hard
+            git pull
+            chmod 755 api/entry-point.sh
+            docker compose -f production.yml build --no-cache
+            docker compose -f production.yml up -d

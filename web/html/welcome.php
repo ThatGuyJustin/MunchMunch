@@ -1,10 +1,13 @@
 <?php
-session_start();
+require_once 'util.php'; // Include the utility functions
 
-if (!isset($_SESSION['user_id'])) {
+start_session(); // Start session
+
+if (!is_user_logged_in()) {  // Check if the user is logged in using the utility function
     header('Location: login.php');
     exit();
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -17,6 +20,6 @@ if (!isset($_SESSION['user_id'])) {
 <body>
     <h1>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
     <p>Thank you for registering. You can now explore and use all features of the platform.</p>
-    <a href="index.php">Go to Main Page</a>
+    <a href="dashboard.php">Go to Main Page</a>
 </body>
 </html>
