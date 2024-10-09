@@ -1,7 +1,10 @@
 <?php
-session_start();
-session_unset();
-session_destroy();
-header('Location: home.php');
+require_once 'util.php';
+
+// Logout the user by clearing the session
+logout_user();
+
+// Redirect to the login page
+header('Location: login.php');
 exit();
 ?>
