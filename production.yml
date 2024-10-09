@@ -36,28 +36,14 @@ services:
       - "./api:/app"
     ports:
       - 5069:5000
-    environment:
-      DATABASE_NAME: "MunchMunch"
-      DATABASE_HOST: "main_database"
-      DATABASE_USER: "postgres"
-      DATABASE_PASSWORD: "BestPasswordEver69"
-      JWT_SECRET_KEY: "SomethingSuperSecure?"
-      SECURE_PASSSWORD_SALT: "SomethingSuperSecure?"
-      REQUIRE_CONFIRMATION: true
-      S3_USERNAME: "admin"
-      S3_PASSWORD: "BestPasswordEver69"
-      S3_BUCKET: "munchmunch"
-      S3_HOST: "s3storage:9000"
+    env_file: ".env"
   # Relational Database
   # Postgresql (Users, other basic information)
   main_database:
     image: postgres:16
     restart: always
     shm_size: 128mb
-    environment:
-      POSTGRES_PASSWORD: "BestPasswordEver69"
-      POSTGRES_DB: "MunchMunch"
-      POSTGRES_USER: "postgres"
+    env_file: ".env"
     ports:
       - "5432:5432"
     volumes:
@@ -77,9 +63,7 @@ services:
       - '27017:27017'
     volumes:
       - "./data/mongodb:/data/db"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: BestPasswordEver69
+    env_file: ".env"
     healthcheck: 
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
@@ -102,9 +86,7 @@ services:
       - type: bind
         source: "./cfg/pgadmin/servers.json"
         target: "/pgadmin4/servers.json"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@foodtok.io"
-      PGADMIN_DEFAULT_PASSWORD: "BestPasswordEver69"
+    env_file: ".env"
     ports:
       - "6969:80"
   # MongoDB Web UI
@@ -118,12 +100,7 @@ services:
           restart: true
     ports:
       - 8082:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: "admin"
-      ME_CONFIG_MONGODB_ADMINPASSWORD: "BestPasswordEver69"
-      ME_CONFIG_BASICAUTH_USERNAME: "admin"
-      ME_CONFIG_BASICAUTH_PASSWORD: "BestPasswordEver69"
-      ME_CONFIG_MONGODB_SERVER: post_database
+    env_file: ".env"
   # S3 Object storage
   # Used for profile pictures, recipe pictures/videos, and other files that need to be shared.
   s3storage:
@@ -131,9 +108,7 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: "admin"
-      MINIO_ROOT_PASSWORD: "BestPasswordEver69"
+    env_file: ".env"
     volumes:
       - "./data/minio/data:/data"
     command: server /data --console-address ":9001"
