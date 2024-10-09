@@ -16,9 +16,7 @@ def authed(f):
     def decorated(*args, **kwargs):
         token = None
         if "Authorization" in request.headers:
-            print(request.headers["Authorization"])
-            # token = request.headers["Authorization"].split(" ")[1]
-            token = request.headers["Authorization"]
+            token = request.headers["Authorization"].split(" ")[1]
         if not token:
             return {
                 "message": "Missing Authorization Token",
