@@ -1,4 +1,5 @@
 <?php
+require_once 'util.php'; // Include utility functions
 session_start();
 
 // Check if the user is logged in
@@ -10,18 +11,9 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 // Fetch current user profile data from the backend API
-$api_url = 'http://backend:5000/api/get_profile?user_id=' . $user_id;
-$ch = curl_init($api_url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($ch);
-
-if ($response === false) {
-    die('Error communicating with the backend server.');
-}
-
-$user = json_decode($response, true);
-
-curl_close($ch);
+$api_path = 'api/users/self';
+$response = api_request_with_token($api_path);
+$user = $response["data"];
 
 // Handle form submission for profile updates, including image upload
 $error_message = '';
@@ -29,9 +21,10 @@ $success_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize and retrieve the input values
+    $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $preferences = trim($_POST['preferences']);
-    $password = trim($_POST['password']);
+    // $password = trim($_POST['password']);
     $profile_image = $_FILES['profile_image'];
 
     // Handle file upload
@@ -60,37 +53,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($error_message)) {
         // Prepare the data for API request
         $data = [
-            'user_id' => $user_id,
+            'name' => $name,
             'email' => $email,
             'preferences' => $preferences,
-            'password' => $password,
-            'profile_image' => isset($profile_image_url) ? $profile_image_url : $user['profile_image'], // Keep old image if not changed
+            // 'password' => $password,
+            'avatar' => isset($profile_image_url) ? $profile_image_url : $user['avatar'], // Keep old image if not changed
         ];
 
         // Send update request to the backend API
-        $api_url = 'http://backend:5000/api/update_profile';
-        $ch = curl_init($api_url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        $api_url = 'api/users/' . $user_id;
+        $response = api_request_with_token($api_url, "PATCH", $data);
 
-        $response = curl_exec($ch);
-
-        if ($response === false) {
-            $error_message = 'Error communicating with the backend server.';
+        if (isset($response['code']) && $response['code'] === 200) {
+            $success_message = 'Profile updated successfully!';
+            $user = $response['data'];
+            // Update session with the new profile image if changed
+            $_SESSION['profile_image'] = $profile_image_url;
         } else {
-            $result = json_decode($response, true);
-            if (isset($result['code']) && $result['code'] === 200) {
-                $success_message = 'Profile updated successfully!';
-                // Update session with the new profile image if changed
-                $_SESSION['profile_image'] = $profile_image_url;
-            } else {
-                $error_message = isset($result['msg']) ? $result['msg'] : 'Profile update failed.';
-            }
+            $error_message = isset($response['msg']) ? $response['msg'] : 'Profile update failed.';
         }
 
-        curl_close($ch);
     }
 }
 ?>
@@ -104,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <h1>Update Profile</h1>
-
     <!-- Display success or error messages -->
     <?php if (!empty($error_message)): ?>
         <p class="error"><?php echo htmlspecialchars($error_message); ?></p>
@@ -119,6 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <form action="profile.php" method="post" enctype="multipart/form-data">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" value="<?php echo htmlspecialchars($user['username']);?>" disabled></br>
+
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($user['name']); ?>"></br>
+
         <label for="email">Email:</label>
         <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($user['email']); ?>" required><br>
 

@@ -92,7 +92,8 @@ function authenticate_user($username, $password) {
 }
 
 // Function to validate token for subsequent API requests
-function api_request_with_token($url, $method = 'GET', $data = null) {
+function api_request_with_token($path, $method = 'GET', $data = null) {
+    $url = getenv("HTTP_HOST") . "/" . $path;
     start_session();
     
     // Check if token exists in the session
@@ -103,15 +104,27 @@ function api_request_with_token($url, $method = 'GET', $data = null) {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     
-    // If it's a POST or PATCH request, include the data
-    if ($method === 'POST') {
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    } elseif ($method === 'PATCH') {
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    switch($method){
+        case 'POST':
+            curl_setopt($ch, CURLOPT_POST, true);
+            break;
+        case 'PATCH':
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            break;
+        case 'PUT':
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+            break;
+        case 'DELETE':
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+            break;
+        default:
+            break;
     }
 
+    // Set JSON data to be sent.
+    if (!is_null($data)){
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    }
     // Add the Authorization header with the token
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
