@@ -1,9 +1,69 @@
+<?php
+require_once 'util.php'; // Include utility functions
+
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+start_session();
+
+if (!is_user_logged_in()) {
+    header('Location: login.php');
+    exit();
+}
+
+$error_message = '';
+$success_message = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Retrieve user inputs
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $tags = isset($_POST['tags']) ? explode(",", $_POST['tags']) : [];
+    $steps = isset($_POST['steps']) ? explode("\n", trim($_POST['steps'])) : [];
+    $time_to_cook = intval($_POST['time_to_cook'] ?? 0);
+    $time_to_prepare = intval($_POST['time_to_prepare'] ?? 0);
+    $skill_level = intval($_POST['skill_level'] ?? 1);
+    $user_id = $_SESSION['user_id'];
+
+    // Prepare data for the API request
+    $data = [
+        'user' => $user_id,
+        'title' => $title,
+        'description' => $description,
+        'tags' => $tags,
+        'steps' => $steps,
+        'time_to_cook' => $time_to_cook,
+        'time_to_prepare' => $time_to_prepare,
+        'skill_level' => $skill_level
+    ];
+
+    // API URL
+    $api_url = "http://backend:5000/api/recipes"; // Correct API endpoint
+
+    // Initialize cURL
+    $ch = curl_init($api_url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
+
+    // Execute the request
+    $response = curl_exec($ch);
+
+
+    curl_close($ch);
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kraft Mac and Cheese Recipe</title>
+    <title><?php echo htmlspecialchars($title); ?></title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -55,7 +115,7 @@
             margin-top: 20px;
         }
         .buttons button {
-            background-color: #28a745;
+            background-color: #266fff;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -89,17 +149,18 @@
 <div class="container">
     <!-- Title and Author Section -->
     <div class="title-section">
-        <h1>Kraft Mac and Cheese</h1>
-        <span class="author">By Some Random Person (600)</span>
+        <h1><?php echo htmlspecialchars($title); ?></h1>
+        <span class="author">By <?php echo htmlspecialchars($_SESSION['username']); ?> (<?php echo htmlspecialchars($user_id); ?>)</span>
     </div>
 
     <!-- Main Content Section -->
     <div class="main-content">
         <!-- Left Panel with Recipe Details -->
         <div class="left-panel">
-            <div class="recipe-details">Tags: Pasta, American</div>
-            <div class="recipe-details">Time to Cook: 10 Minutes</div>
-            <div class="recipe-details">Skill Level: Beginner</div>
+            <div class="recipe-details">Tags: <?php echo implode(", ", $tags); ?></div>
+            <div class="recipe-details">Time to Cook: <?php echo htmlspecialchars($time_to_cook / 60); ?> Minutes</div>
+            <div class="recipe-details">Skill Level: <?php echo htmlspecialchars($skill_level); ?></div>
+            <!-- If you have additional menu labels, include them dynamically as needed -->
             <div class="recipe-details">Menu Label 1</div>
             <div class="recipe-details">Menu Label 2</div>
             <div class="buttons">
@@ -109,10 +170,10 @@
         </div>
 
         <!-- Right Panel with Recipe Image -->
-        <div class="right-panel">
-            <img src="html/pictures/recipe/macandcheese.jpg" alt="Kraft Mac and Cheese">
+        <!--<div class="right-panel">
+            <img src="html/pictures/recipe/macandcheese.jpg" alt="<?php echo htmlspecialchars($title); ?>">
         </div>
-    </div>
+    </div>-->
 
     <!-- Review Section -->
     <div class="review-section">
