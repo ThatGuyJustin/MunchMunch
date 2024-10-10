@@ -19,7 +19,7 @@ function set_user_session($user_id, $username, $token) {
 // Function to register a user
 function register_user($username, $email, $password) {
     $data = [
-        'login' => $username,
+        'username' => $username,
         'email' => $email,
         'password' => $password,
     ];
@@ -130,6 +130,7 @@ function api_request_with_token($path, $method = 'GET', $data = null) {
         'Content-Type: application/json',
         'Authorization: Bearer ' . $_SESSION['token']
     ]);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     
     $response = curl_exec($ch);
     curl_close($ch);

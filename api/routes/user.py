@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from models.user import Users
+from models.user import Users as User_model
 from util.auth import authed
 
 users = Blueprint('users', __name__)
@@ -13,8 +13,9 @@ def get_own_user(user):
 
 
 @users.get("/<uid>")
+@authed
 def get_user_by_id(user, uid):
-    to_get = Users.get_or_none(id=uid)
+    to_get = User_model.get_or_none(id=uid)
     return {
         'code': 200 if to_get else 404,
         'data': to_get.to_dict(),
@@ -29,7 +30,7 @@ def modify_user(uid):
     if not request.json:
         return {"code": 400, "msg": "Missing Data"}, 400
 
-    to_update = Users.get_or_none(id=uid)
+    to_update = User_model.get_or_none(id=uid)
     if not to_update:
         return {
             'code': 404,
@@ -37,8 +38,8 @@ def modify_user(uid):
             'data': {}
         }
 
-    Users.update(**request.json).where(Users.id == uid).execute()
-    to_update = Users.get_or_none(id=uid)
+    User_model.update(**request.json).where(User_model.id == uid).execute()
+    to_update = User_model.get_or_none(id=uid)
     return {'code': 200, 'data': to_update.to_dict(), 'msg': 'User Updated.'}, 200
 
 
@@ -51,9 +52,9 @@ def delete_user(user, uid):
             'data': None,
             'msg': 'Forbidden'
         }, 403
-    to_remove = Users.get_or_none(id=uid)
+    to_remove = User_model.get_or_none(id=uid)
     if to_remove:
-        Users.delete_by_id(id=to_remove.id)
+        User_model.delete_by_id(id=to_remove.id)
         return {
             'code': 200,
             'data': None,
@@ -65,3 +66,28 @@ def delete_user(user, uid):
             'data': None,
             'msg': "User not found"
         }, 404
+
+
+@users.put("/favorites/<recipe>")
+@authed
+def put_favorite_recipe(user, recipe):
+
+    if recipe in user.favorite_posts:
+        return "👎", 200
+
+    user.favorite_posts.append(recipe)
+    user.save()
+
+    return "👌", 200
+
+
+@users.delete("/favorites/<recipe>")
+def delete_favorite_recipe(user, recipe):
+
+    if recipe not in user.favorite_posts:
+        return "👎", 200
+
+    user.favorite_posts.remove(recipe)
+    user.save()
+
+    return "👌", 200
