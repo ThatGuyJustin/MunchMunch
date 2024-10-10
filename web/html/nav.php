@@ -134,25 +134,31 @@
     </div>
 
     <script>
-        function toggleDropdown() 
-        {
-            const dropdown = document.getElementById('dropdown-menu');
-            event.preventDefault();
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
+    function toggleDropdown(event) 
+    {
+        event.stopPropagation();
+        
+        const dropdown = document.getElementById('dropdown-menu');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
 
-        window.onclick = function(event)
-         {
-            if (!event.target.matches('.profile-icon')) 
+
+    document.querySelector('.profile-icon').addEventListener('click', toggleDropdown);
+
+
+    window.onclick = function(event) 
+    {
+        const dropdown = document.getElementById('dropdown-menu');
+        
+        if (!event.target.closest('.profile-icon') && !event.target.closest('#dropdown-menu')) 
+        {
+            if (dropdown.style.display === 'block') 
             {
-                const dropdown = document.getElementById('dropdown-menu');
-                if (dropdown.style.display === 'block')
-                 {
-                    dropdown.style.display = 'none';
-                }
+                dropdown.style.display = 'none';
             }
-        };
-    </script>
+        }
+    };
+</script>
 
 </body>
 </html>
