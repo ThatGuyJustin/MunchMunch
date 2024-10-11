@@ -92,9 +92,11 @@ function authenticate_user($username, $password) {
 }
 
 // Function to validate token for subsequent API requests
-function api_request_with_token($path, $method = 'GET', $data = null) {
+function api_request_with_token($path, $method = 'GET', $data = null, $image = null) {
     $url = getenv("HTTP_HOST") . "/" . $path;
     start_session();
+
+    $content_type = 'application/json';
     
     // Check if token exists in the session
     if (!isset($_SESSION['token'])) {
@@ -125,9 +127,16 @@ function api_request_with_token($path, $method = 'GET', $data = null) {
     if (!is_null($data)){
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     }
+
+    if (!is_null($image)){
+        $cFile = curl_file_create($image["tmp_name"], $image["type"], $image["name"]);
+        $content_type = "multipart/form-data";
+        $data = array("file" => $cFile);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    }
     // Add the Authorization header with the token
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
+        "Content-Type: $content_type",
         'Authorization: Bearer ' . $_SESSION['token']
     ]);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
