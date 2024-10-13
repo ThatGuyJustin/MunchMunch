@@ -3,6 +3,13 @@ require_once 'util.php'; // Include utility functions
 
 start_session(); // Start the session if not started
 
+start_session(); // Start session
+
+if (is_user_logged_in()) {  // Check if the user is logged in using the utility function
+    header('Location: dashboard.php');
+}
+
+
 $error_message = '';
 
 // Handle login form submission
@@ -22,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             set_user_session($result['user']['id'], $result['user']['username'], $result['user']['token'] ?? '');
 
             // Redirect to the dashboard or homepage
-            header('Location: welcome.php');
+            header('Location: dashboard.php');
             exit();
         } else {
             $error_message = isset($result['msg']) ? $result['msg'] : 'Invalid username or password.';
