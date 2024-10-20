@@ -1,5 +1,6 @@
 <?php
 require_once 'util.php'; // Include utility functions
+require_once 'nav.php';
 session_start();
 
 // Check if the user is logged in
@@ -10,117 +11,122 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Fetch current user profile data from the backend API
 $api_path = 'api/users/self';
 $response = api_request_with_token($api_path);
 $user = $response["data"];
 
-// Handle form submission for profile updates, including image upload
-$error_message = '';
-$success_message = '';
+// Example data for uploaded and favorited recipes (You can fetch actual data from your API)
+$uploaded_recipes = [
+    ['title' => 'Spaghetti Carbonara', 'date' => '2024-09-28'],
+    ['title' => 'Chicken Curry', 'date' => '2024-10-02'],
+];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Sanitize and retrieve the input values
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $preferences = trim($_POST['preferences']);
-    // $password = trim($_POST['password']);
-    $profile_image = $_FILES['profile_image'];
+$favorited_recipes = [
+    ['title' => 'Vegan Brownies', 'date' => '2024-09-10'],
+    ['title' => 'Tacos al Pastor', 'date' => '2024-09-22'],
+];
 
-    // Handle file upload
-    if (!empty($profile_image['name'])) {
-        $target_dir = "uploads/";
-        $target_file = $target_dir . basename($profile_image['name']);
-        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        
-        // Validate file type (allowing only image formats)
-        $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
-        if (!in_array($imageFileType, $allowed_types)) {
-            $error_message = 'Only JPG, JPEG, PNG, and GIF files are allowed.';
-        } elseif ($profile_image['size'] > 5000000) { // File size limit (5MB)
-            $error_message = 'File is too large.';
-        } else {
-            // Move uploaded file to the server's target directory
-            if (move_uploaded_file($profile_image['tmp_name'], $target_file)) {
-                // Update profile image path in the backend
-                $profile_image_url = $target_file;
-            } else {
-                $error_message = 'There was an error uploading your profile image.';
-            }
-        }
-    }
-
-    if (empty($error_message)) {
-        // Prepare the data for API request
-        $data = [
-            'name' => $name,
-            'email' => $email,
-            'preferences' => $preferences,
-            // 'password' => $password,
-            'avatar' => isset($profile_image_url) ? $profile_image_url : $user['avatar'], // Keep old image if not changed
-        ];
-
-        // Send update request to the backend API
-        $api_url = 'api/users/' . $user_id;
-        $response = api_request_with_token($api_url, "PATCH", $data);
-
-        if (isset($response['code']) && $response['code'] === 200) {
-            $success_message = 'Profile updated successfully!';
-            $user = $response['data'];
-            // Update session with the new profile image if changed
-            $_SESSION['profile_image'] = $profile_image_url;
-        } else {
-            $error_message = isset($response['msg']) ? $response['msg'] : 'Profile update failed.';
-        }
-
-    }
-}
+// Define the profile image URL (This can be dynamically generated based on the user ID and stored avatar)
+$profile_image_url = "/api/media/avatars/" . $_SESSION['user_id'] . "/" . htmlspecialchars($user['avatar']);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php echo($NAV_HEADERS) ?>
     <meta charset="UTF-8">
-    <title>Update Profile - FoodTinder</title>
+    <title>Account - FoodTinder</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <style>
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .profile-box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+        .tab-content {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Update Profile</h1>
-    <!-- Display success or error messages -->
-    <?php if (!empty($error_message)): ?>
-        <p class="error"><?php echo htmlspecialchars($error_message); ?></p>
-    <?php elseif (!empty($success_message)): ?>
-        <p class="success"><?php echo htmlspecialchars($success_message); ?></p>
-    <?php endif; ?>
+    <?php echo($NAV_ICONS) ?>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Left Side - Profile Section (Now in a bordered box) -->
+            <div class="col-md-4">
+                <div class="profile-box">
+                    <div class="text-center mb-4">
+                        <img src="<?php echo $profile_image_url; ?>" class="rounded-circle profile-img mb-3" alt="Profile Image">
+                        <h4 class="card-title"><?php echo htmlspecialchars($user['name']); ?></h4>
+                        <p class="text-muted">@<?php echo htmlspecialchars($user['username']); ?></p>
+                        <p><strong>Dietary Preferences:</strong> <?php echo htmlspecialchars($user['preferences']); ?></p>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Display current profile picture -->
-    <div>
-        <h3>Current Profile Picture:</h3>
-        <img src="<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile Image" width="150">
+            <!-- Right Side - Recipes Section -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <!-- Bootstrap Nav Tabs -->
+                        <ul class="nav nav-tabs card-header-tabs" id="recipeTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="uploaded-tab" data-bs-toggle="tab" data-bs-target="#uploaded" type="button" role="tab" aria-controls="uploaded" aria-selected="true">Recipes Uploaded</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="favorited-tab" data-bs-toggle="tab" data-bs-target="#favorited" type="button" role="tab" aria-controls="favorited" aria-selected="false">Recipes Favorited</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="recipeTabContent">
+                            <!-- Recipes Uploaded Tab -->
+                            <div class="tab-pane fade show active" id="uploaded" role="tabpanel" aria-labelledby="uploaded-tab">
+                                <ul class="list-group list-group-flush">
+                                    <?php if (!empty($uploaded_recipes)): ?>
+                                        <?php foreach ($uploaded_recipes as $recipe): ?>
+                                            <li class="list-group-item">
+                                                <strong><?php echo htmlspecialchars($recipe['title']); ?></strong> 
+                                                <span class="text-muted">(Uploaded on <?php echo htmlspecialchars($recipe['date']); ?>)</span>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <li class="list-group-item">No recipes uploaded yet.</li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
+
+                            <!-- Recipes Favorited Tab -->
+                            <div class="tab-pane fade" id="favorited" role="tabpanel" aria-labelledby="favorited-tab">
+                                <ul class="list-group list-group-flush">
+                                    <?php if (!empty($favorited_recipes)): ?>
+                                        <?php foreach ($favorited_recipes as $recipe): ?>
+                                            <li class="list-group-item">
+                                                <strong><?php echo htmlspecialchars($recipe['title']); ?></strong> 
+                                                <span class="text-muted">(Favorited on <?php echo htmlspecialchars($recipe['date']); ?>)</span>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <li class="list-group-item">No recipes favorited yet.</li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <form action="profile.php" method="post" enctype="multipart/form-data">
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" value="<?php echo htmlspecialchars($user['username']);?>" disabled></br>
-
-        <label for="name">Name:</label>
-        <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($user['name']); ?>"></br>
-
-        <label for="email">Email:</label>
-        <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($user['email']); ?>" required><br>
-
-        <label for="preferences">Dietary Preferences:</label>
-        <input type="text" name="preferences" id="preferences" value="<?php echo htmlspecialchars($user['preferences']); ?>"><br>
-
-        <label for="password">New Password (optional):</label>
-        <input type="password" name="password" id="password"><br>
-
-        <label for="profile_image">Profile Image (optional):</label>
-        <input type="file" name="profile_image" id="profile_image"><br>
-
-        <input type="submit" value="Update Profile">
-    </form>
-
-    <p><a href="dashboard.php">Back to Dashboard</a></p>
+    <!-- Bootstrap JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
