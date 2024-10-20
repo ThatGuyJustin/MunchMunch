@@ -1,8 +1,19 @@
+import hashlib
 from io import BytesIO
 
 from flask import current_app
+from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+
+def generate_filename(file) -> str:
+    filename = secure_filename(file.filename)
+    new_filename = hashlib.md5(file.read()).hexdigest()
+    file.seek(0)
+    ext = secure_filename(file.filename).split(".")[-1]
+    new_filename = new_filename + "." + ext
+    return new_filename
 
 
 def upload_object(filename, data, length, path):
