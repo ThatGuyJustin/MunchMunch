@@ -104,9 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <!-- Display current profile picture -->
-    <!-- <div class=container>
-        <img class="img-thumbnail rounded" src="<?php echo $_SESSION["HTTP_HOST"] . "/api/media/avatars/" . $_SESSION['user_id'] . "/" . htmlspecialchars($user['avatar']); ?>" width="100" height="100" alt="Profile Image" width="150">
-    </div> -->
     <div class=container>
         <img class="img-thumbnail rounded mx-auto d-block row mb-3" src="<?php echo $_SESSION["HTTP_HOST"] . "/api/media/avatars/" . $_SESSION['user_id'] . "/" . htmlspecialchars($user['avatar']); ?>" width="100" height="100" alt="Profile Image" width="150">
         <form action="account.php" method="post" enctype="multipart/form-data">

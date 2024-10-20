@@ -1,6 +1,7 @@
+import datetime
 import re
 
-from peewee import AutoField, TextField, IntegerField
+from peewee import AutoField, TextField, IntegerField, DateTimeField
 from playhouse.postgres_ext import ArrayField, JSONField
 from werkzeug.security import check_password_hash
 
@@ -17,6 +18,7 @@ class Users(PostgresBase):
     id = AutoField()
     username = TextField(unique=True)
     name = TextField(null=True)
+    created_at = DateTimeField(default=datetime.datetime.now(datetime.UTC))
     email = TextField(unique=True)
     account_flags = ArrayField(TextField, default=[])
     favorite_posts = ArrayField(TextField, default=[])
@@ -28,7 +30,7 @@ class Users(PostgresBase):
 
     def to_dict(self):
         base = {"id": self.id, "username": self.username, "name": self.name or self.username, "email": self.email, "avatar": self.avatar or "default.png",
-                'following': self.following, 'followers': self.followers, 'preferences': self.preferences}
+                'following': self.following, 'followers': self.followers, 'preferences': self.preferences, 'created_at': self.created_at}
         if self.account_flags:
             base["account_flags"] = self.account_flags
         if self.favorite_posts:

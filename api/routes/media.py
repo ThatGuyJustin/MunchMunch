@@ -3,11 +3,12 @@ import mimetypes
 import os
 
 from flask import Blueprint, send_file, request
-from werkzeug.utils import secure_filename
+from mongoengine import DoesNotExist
 
+from models.post import Post
 from models.user import Users
 from util.auth import authed
-from util.files import get_object, allowed_file, upload_object
+from util.files import get_object, allowed_file, upload_object, generate_filename
 
 media = Blueprint('media', __name__)
 
@@ -42,22 +43,18 @@ def update_avatar(user):
         if file.filename == "":
             return "Missing File.", 400
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            new_filename = hashlib.md5(file.read()).hexdigest()
-            file.seek(0)
-            ext = secure_filename(file.filename).split(".")[-1]
-            new_filename = new_filename + "." + ext
+            filename = generate_filename(file)
             size = os.fstat(file.fileno()).st_size
-            upload_object(new_filename, file, size, f"avatars/{user.id}")
+            upload_object(filename, file, size, f"avatars/{user.id}")
 
-            user.avatar = new_filename
+            user.avatar = filename
             user.save()
 
-            return new_filename, 200
+            return filename, 200
 
 
-@media.get("/posts/<pid>/<image>/<hash>")
-def get_posts_media(pid, image, media_hash):
+@media.get("/recipe/<rid>/<image>/<hash>")
+def get_posts_media(rid, image, media_hash):
     # Get post
 
     # Get image type
@@ -66,3 +63,34 @@ def get_posts_media(pid, image, media_hash):
 
     # Return Image
     pass
+
+
+@media.post("/recipe/<rid>/<media>")
+def upload_recipe_media(rid, media_type):
+
+    VALID_TYPES = ["main", "step"]
+
+    try:
+        recipe = Post.objects.get(id=rid)
+    except DoesNotExist:
+        return {
+            'code': 404,
+            'msg': "Recipe not found",
+            'data': {}
+        }, 404
+
+    real_media_type = media_type
+
+    if "file" not in request.files:
+        return "Missing File.", 400
+
+    file = request.files["file"]
+    # If the user does not select a file, the browser submits an
+    # empty file without a filename.
+    if file.filename == "":
+        return "Missing File.", 400
+    if file and allowed_file(file.filename):
+        filename = generate_filename(file)
+        size = os.fstat(file.fileno()).st_size
+        upload_object(filename, file, size, f"recipes/{rid}/{real_media_type}")
+
