@@ -5,6 +5,7 @@ from flask import Blueprint, request, redirect
 from mongoengine import DoesNotExist
 
 from models.post import Post, Review
+from models.user import Users
 from util.auth import authed, can_do_admin_requests
 
 recipes = Blueprint('recipes', __name__)
@@ -53,6 +54,7 @@ def get_recipe(post_id):
         }, 404
     base_json = json.loads(recipe.to_json())
     base_json['id'] = base_json["_id"]["$oid"]
+    base_json['reviews'] = len(base_json['reviews'])
     del base_json['_id']
     return {
         'code': 200,
@@ -114,6 +116,37 @@ def modify_recipe(user, recipe_id):
         'data': base_json,
         'msg': "Recipe Updated"
     }, 200
+
+@recipes.get('/<recipe_id>/reviews')
+@authed
+def get_recipe_reviews(user, recipe_id):
+    try:
+        recipe = Post.objects.get(id=recipe_id)
+    except DoesNotExist:
+        return {
+            'code': 404,
+            'msg': "Recipe not found",
+            'data': {}
+        }, 404
+    
+    base_json = json.loads(recipe.to_json())
+    base_json['id'] = base_json["_id"]["$oid"]
+    reviews = base_json['reviews']
+    new_reviews = []
+    for review in reviews:
+        user = Users.get_or_none(id=review['user'])
+        if not user:
+            review['user'] = {
+                "username": f"deleted_user_{review['user']}",
+                "name": "Deleted User",
+                "avatar": "default.png"
+            }
+        else:
+            review['user'] = user.to_dict()
+
+        new_reviews.append(review)
+
+    return {'code': 200, 'data': new_reviews, 'msg': ''}, 200
 
 
 @recipes.post("/<recipe_id>/reviews")
