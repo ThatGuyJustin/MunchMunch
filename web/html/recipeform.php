@@ -72,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (isset($result['code']) && $result['code'] === 200) {
             $success_message = "Recipe submitted successfully!";
+            header('Location: card.php?id=' . $result["data"]["id"]);
         } else {
             $error_message = "Error submitting recipe. API response: " . json_encode($result);
         }
@@ -84,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="js/scripts.js"></script>
     <meta charset="UTF-8">
     <title>Upload Recipe</title>
     <style>
