@@ -11,7 +11,7 @@ recipes = Blueprint('recipes', __name__)
 
 
 @recipes.post('/')
-# @authed
+@authed
 def post_recipe():
     _FIELDS = ["user", "title", "description", "steps", "ingredients", "time_to_cook", "time_to_prepare", "skill_level"]
     missing_fields = []
@@ -137,10 +137,8 @@ def review_recipe(user, recipe_id):
         }, 406
 
     re = Review(**rjson, user=user.id)
-    asdict(re)
 
-    recipe.reviews.append(re)
-    updooted = recipe.update()
+    updooted = recipe.update(add_to_set__reviews=asdict(re))
     recipe.reload()
     if updooted != 0:
         return {
