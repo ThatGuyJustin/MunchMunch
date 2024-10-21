@@ -106,7 +106,7 @@ def get_recipes(user, uid):
     u = User_model.get_or_none(id=uid)
     if not u:
         return {"code": 404, "msg": "User not found"}, 404
-    if "PRIVATE_PROFILE" in u.account_flags and "ADMIN" not in user.account_flags:
+    if "PRIVATE_PROFILE" in u.account_flags and not can_do_admin_requests(user) and int(uid) != int(user.id):
         return {"code": 403, "data": {}, "msg": "User's Profile Is Private."}, 403
 
     limit = request.args.get("limit", 50)
@@ -134,7 +134,7 @@ def get_user_favorites(user, uid):
     u = User_model.get_or_none(id=uid)
     if not u:
         return {"code": 404, "msg": "User not found"}, 404
-    if "PRIVATE_FAVORITES" in u.account_flags and "ADMIN" not in user.account_flags:
+    if "PRIVATE_FAVORITES" in u.account_flags and not can_do_admin_requests(user) and int(uid) != int(user.id):
         return {"code": 403, "data": {}, "msg": "User's Favorites Are Private."}, 403
 
     return {"code": 200, "data": u.favorite_posts, "msg": None}, 200

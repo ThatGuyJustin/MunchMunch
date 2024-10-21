@@ -12,13 +12,27 @@ $NAV_ICONS = <<<EOD
     <div class="container-fluid">
         <a class="navbar-brand" href="index.php">FoodTinder</a>
         
-        <!-- Search Button -->
-        <form class="d-flex me-auto">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
+        <!-- Combined Search Bar with Filter Dropdown -->
+        <form class="d-flex me-auto" method="GET" action="search.php">
+            <div class="input-group">
+                <!-- Dropdown for Search Filter -->
+                <div class="input-group-prepend">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="searchFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filter
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="searchFilterDropdown">
+                        <li><a class="dropdown-item" href="#" onclick="setSearchFilter('recipe')">Recipe Name</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="setSearchFilter('tag')">Tag</a></li>
+                    </ul>
+                </div>
+                
+                <input type="hidden" name="filter" id="searchFilter" value="recipe">
 
-        <!-- Right Side Dropdown -->
+                <input class="form-control" type="search" name="query" placeholder="Search" aria-label="Search">
+
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </div>
+        </form>
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-regular fa-user"></i>
@@ -37,6 +51,13 @@ $NAV_ICONS = <<<EOD
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // JavaScript function to update the filter value in the hidden input
+    function setSearchFilter(filter) {
+        document.getElementById('searchFilter').value = filter;
+    }
+</script>
 EOD;
 
 ?>
