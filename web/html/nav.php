@@ -26,8 +26,12 @@ $NAV_ICONS = <<<EOD
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="profile.php">Profile</a></li>
                 <li><a class="dropdown-item" href="account.php">Account Editing</a></li>
-                <li><a class="dropdown-item" href="notifications.php">Notifications</a></li>
+                <li><a class="dropdown-item" href="notification.php">Notifications</a></li>
                 <li><a class="dropdown-item" href="settings.php">Settings</a></li>
+                <li><a class="dropdown-item" href="recipeform.php">upload recipe</a></li>
+                <li><a class="dropdown-item" href="card.php">cards</a></li>
+                <li><a class="dropdown-item" href="contact.php">Conttact Admin</a></li>
+
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item text-danger" href="logout.php">Log Out</a></li>
             </ul>
