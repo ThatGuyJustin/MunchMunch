@@ -35,7 +35,7 @@ $profile_image_url = "/api/media/avatars/" . $_SESSION['user_id'] . "/" . htmlsp
 <head>
     <?php echo($NAV_HEADERS) ?>
     <meta charset="UTF-8">
-    <title>Account - FoodTinder</title>
+    <title>Profile - <?php echo($user["name"]); ?></title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/bootstrap.css">
     <style>
