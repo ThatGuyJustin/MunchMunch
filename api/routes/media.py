@@ -15,12 +15,18 @@ media = Blueprint('media', __name__)
 
 @media.get("/avatars/<uid>/<media_hash>")
 def get_avatar(uid, media_hash):
+    if uid == "0":
+        return send_file(f"./static/default.png", as_attachment=False, mimetype="image/png", download_name="avatar.png")
+
     user = Users.get_or_none(id=uid)
     if not user:
         return "User Not Found.", 404
 
     pfp_hash = user.avatar or "default.png"
     path = "default" if not user.avatar else uid
+
+    if pfp_hash == "default.png":
+        return send_file(f"./static/default.png", as_attachment=False, mimetype="image/png", download_name=pfp_hash)
 
     picture = get_object(f"avatars/{path}", pfp_hash)
 

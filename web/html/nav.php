@@ -1,61 +1,42 @@
 <?php 
 
 $NAV_HEADERS = <<<EOD
-
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <!-- Font Awesome Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="css/nav.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 EOD;
 
 $NAV_ICONS = <<<EOD
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="index.php">FoodTinder</a>
+        
+        <!-- Search Button -->
+        <form class="d-flex me-auto">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
 
-<div id="nav" style="padding-bottom: 3%">
-
-    <a href="search.php" class="search-button"><i class="fas fa-search"></i>Search</a>
-
-    <div class="menu">
-        <div class="profile-icon" onclick="toggleDropdown()">
-            <i class="fa-regular fa-user"></i>
-        </div>
-        <div class="dropdown" id="dropdown-menu">
-            <a href="profile.php"><i class="fa-regular fa-user"></i>Your Profile</a>
-            <a href="account.php"><i class="fas fa-user-cog"></i>Account</a>
-            <a href="edit-profile.php"><i class="fas fa-edit"></i>Edit Profile</a>
-            <a href="notifications.php"><i class="fas fa-bell"></i>Notifications</a>
-            <a href="settings.php"><i class="fas fa-cog"></i>Settings</a>
-            <a href="logout.php"><i class="fas fa-sign-out-alt"></i>Log Out</a>
+        <!-- Right Side Dropdown -->
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-regular fa-user"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="profile.php">Profile</a></li>
+                <li><a class="dropdown-item" href="account.php">Account Editing</a></li>
+                <li><a class="dropdown-item" href="notifications.php">Notifications</a></li>
+                <li><a class="dropdown-item" href="settings.php">Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="logout.php">Log Out</a></li>
+            </ul>
         </div>
     </div>
+</nav>
 
-    <script>
-    function toggleDropdown(event) 
-    {
-        event.stopPropagation();
-        
-        const dropdown = document.getElementById('dropdown-menu');
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    }
-
-
-    document.querySelector('.profile-icon').addEventListener('click', toggleDropdown);
-
-
-    window.onclick = function(event) 
-    {
-        const dropdown = document.getElementById('dropdown-menu');
-        
-        if (!event.target.closest('.profile-icon') && !event.target.closest('#dropdown-menu')) 
-        {
-            if (dropdown.style.display === 'block') 
-            {
-                dropdown.style.display = 'none';
-            }
-        }
-    };
-    </script>
-</div>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
 EOD;
 
 ?>
