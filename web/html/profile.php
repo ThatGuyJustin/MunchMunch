@@ -40,24 +40,26 @@ $api_path_recipes = "api/users/" . $user["id"] . "/recipes";
 $api_path_favorites = "api/users/" . $user["id"] . "/favorites";
 
 if (!$is_error){
-    if(in_array("PRIVATE_PROFILE", $user["account_flags"])){
-        $uploaded_recipes = [
-            ['title' => "This Account is private.", 'created_at' => '']
-        ];
-        $favorited_recipes = [
-            ['title' => "This Account is private.", 'created_at' => '']
-        ];
-    }else{
-        $recipe_response = api_request_with_token($api_path_recipes);
-        $uploaded_recipes = $recipe_response['data'];
-    }
-    if(in_array("PRIVATE_FAVORITES", $user["account_flags"])){
-        $favorited_recipes = [
-            ['title' => "This Account is not sharing their favorites.", 'created_at' => '']
-        ];
-    }else{
-        $fav_response = api_request_with_token($api_path_favorites);
-        $favorited_recipes = $fav_response['data'];
+    if($_SESSION['user_id'] != $user["id"]){
+        if(in_array("PRIVATE_PROFILE", $user["account_flags"])){
+            $uploaded_recipes = [
+                ['title' => "This Account is private.", 'created_at' => '']
+            ];
+            $favorited_recipes = [
+                ['title' => "This Account is private.", 'created_at' => '']
+            ];
+        }else{
+            $recipe_response = api_request_with_token($api_path_recipes);
+            $uploaded_recipes = $recipe_response['data'];
+        }
+        if(in_array("PRIVATE_FAVORITES", $user["account_flags"])){
+            $favorited_recipes = [
+                ['title' => "This Account is not sharing their favorites.", 'created_at' => '']
+            ];
+        }else{
+            $fav_response = api_request_with_token($api_path_favorites);
+            $favorited_recipes = $fav_response['data'];
+        }
     }
 
     // $uploaded_recipes = [
