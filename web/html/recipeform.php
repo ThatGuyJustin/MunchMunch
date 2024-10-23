@@ -50,35 +50,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'skill_level' => $skill_level
     ];
 
-    // API URL
-    $api_url = "http://backend:5000/api/recipes"; // Correct API endpoint
+    // Send the API request using the util function
+    $response = api_request_with_token("api/recipes", 'POST', $data);
 
-    // Initialize cURL
-    $ch = curl_init($api_url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
-
-    // Execute the request
-    $response = curl_exec($ch);
-
-    // Check for cURL errors
+    // Check for errors
     if ($response === false) {
-        $error_message = 'Curl error: ' . curl_error($ch);
+        $error_message = 'Error communicating with the API.';
     } else {
-        $result = json_decode($response, true);
-
-        if (isset($result['code']) && $result['code'] === 200) {
+        if (isset($response['code']) && $response['code'] === 200) {
             $success_message = "Recipe submitted successfully!";
-            header('Location: card.php?id=' . $result["data"]["id"]);
+            header('Location: card.php?id=' . $response["data"]["id"]); // Redirect to recipe page
+            exit();
         } else {
-            $error_message = "Error submitting recipe. API response: " . json_encode($result);
+            $error_message = "Error submitting recipe. API response: " . json_encode($response);
         }
     }
-
-    curl_close($ch);
 }
 ?>
 
@@ -170,7 +156,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'nav.php'; ?> 
     <div class="container">
         <h1>Upload a Recipe</h1>
-
 
         <?php if (!empty($success_message)): ?>
             <div class="message success-message"><?php echo htmlspecialchars($success_message); ?></div>

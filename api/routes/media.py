@@ -59,19 +59,24 @@ def update_avatar(user):
             return filename, 200
 
 
-@media.get("/recipe/<rid>/<image>/<hash>")
+@media.get("/recipe/<rid>/<image>/<media_hash>")
 def get_posts_media(rid, image, media_hash):
-    # Get post
+    VALID_TYPES = ["main", "step"]
+
+    real_media_type = image
 
     # Get image type
 
-    # Find image hash
+    picture = get_object(f"recipes/{rid}/{real_media_type}", media_hash)
+
+    if not picture:
+        return "Picture Not Found.", 404
 
     # Return Image
-    pass
+    return send_file(picture, as_attachment=False, mimetype=mimetypes.guess_type(media_hash)[0], download_name=media_hash)
 
 
-@media.post("/recipe/<rid>/<media>")
+@media.post("/recipe/<rid>/<media_type>")
 def upload_recipe_media(rid, media_type):
 
     VALID_TYPES = ["main", "step"]
@@ -87,8 +92,13 @@ def upload_recipe_media(rid, media_type):
 
     real_media_type = media_type
 
+    print(request.files)
+    print(request.headers)
+
     if "file" not in request.files:
         return "Missing File.", 400
+
+    print(1)
 
     file = request.files["file"]
     # If the user does not select a file, the browser submits an
@@ -99,4 +109,9 @@ def upload_recipe_media(rid, media_type):
         filename = generate_filename(file)
         size = os.fstat(file.fileno()).st_size
         upload_object(filename, file, size, f"recipes/{rid}/{real_media_type}")
+        rmedia = recipe.media
+        rmedia[real_media_type].append(filename)
+        recipe.update(set__media=rmedia)
+
+        return filename, 200
 

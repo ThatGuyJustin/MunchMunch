@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize and retrieve the input values
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
-    $preferences = $_POST['preferences'];
+    $preferences = isset($_POST['preferences']) ? $_POST['preferences'] : [];
     // $password = trim($_POST['password']);
     $profile_image = $_FILES['profile_image'];
     $account_flags = $user['account_flags'];
@@ -185,13 +185,9 @@ function checkDisplay($type){
                         <div class="col-lg-auto" id="selectedPreferences">
                             <?php if (!empty($user["preferences"]["dietary"])): ?>
                                 <?php foreach ($user["preferences"]["dietary"] as $dpref): ?>
-                                    <!-- <li class="list-group-item">
-                                        <strong><a href="/card.php?recipe=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></a></strong> 
-                                        <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Uploaded on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
-                                    </li> -->
                                     <div class="item">
                                         <?php echo htmlspecialchars($ID_TO_NAME[$dpref]);?>
-                                        <i onclick="remove_button()" class="remove fa fa-times-circle"></i>
+                                        <i id="item-<?php echo htmlspecialchars($dpref);?>" data="<?php echo htmlspecialchars($dpref);?>" class="remove fa fa-times-circle"></i>
                                         <input type="hidden" name="preferences[]" value="<?php echo htmlspecialchars($dpref); ?>" id="input-<?php echo htmlspecialchars($dpref); ?>">
                                     </div>
                                 <?php endforeach; ?>
@@ -229,7 +225,6 @@ function checkDisplay($type){
                     </div>
                 </div>
             </form>
-            <!-- <a class="btn btn-primary" href="dashboard.php">Back to Dashboard</a> -->
         </div>
     </body>
     <script>
@@ -249,6 +244,8 @@ function checkDisplay($type){
                 // Create the remove button
                 const removeBtn = document.createElement('i');
                 removeBtn.className = 'remove fa fa-times-circle';
+                removeBtn.id = "item";
+                removeBtn.data = select.value;
                 removeBtn.onclick = function() {
                     selectedItemsDiv.removeChild(itemDiv);
                     const option = Array.from(select.options).find(opt => opt.value === selectedValue);
@@ -284,20 +281,20 @@ function checkDisplay($type){
                 select.selectedIndex = 0;
             }
         }
-        function remove_button(){
-            const selectedItemsDiv = document.getElementById('selectedPreferences');
-            const select = document.getElementById('preferences');
-            selectedItemsDiv.removeChild(this.parentNode.nodeName);
-            const option = Array.from(select.options).find(opt => opt.value === this.parentNode.textContent);
-            if (option) {
-                option.style.display = 'block'; // Re-show the option in the select
-            }
-
-            // // Remove the hidden input
-            // const hiddenInput = document.getElementById(`input-${selectedValue}`);
-            // if (hiddenInput) {
-            //     hiddenInput.parentNode.removeChild(hiddenInput);
-            // }
-        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>
+            $("[id^=item]").on("click",  function(event) {
+                let YEET = event.target.getAttribute("data");
+                console.log(YEET);
+                const selectedItemsDiv = document.getElementById('selectedPreferences');
+                const select = document.getElementById('preferences');
+                console.log(event.target.parentElement);
+                selectedItemsDiv.removeChild(event.target.parentElement);
+                const option = Array.from(select.options).find(opt => opt.value === YEET);
+                if (option) {
+                    option.style.display = 'block';
+                }
+            });
     </script>
 </html>
