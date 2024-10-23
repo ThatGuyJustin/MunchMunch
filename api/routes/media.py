@@ -92,13 +92,8 @@ def upload_recipe_media(rid, media_type):
 
     real_media_type = media_type
 
-    print(request.files)
-    print(request.headers)
-
     if "file" not in request.files:
         return "Missing File.", 400
-
-    print(1)
 
     file = request.files["file"]
     # If the user does not select a file, the browser submits an
