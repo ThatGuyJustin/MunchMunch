@@ -13,7 +13,7 @@ recipes = Blueprint('recipes', __name__)
 
 @recipes.post('/')
 @authed
-def post_recipe():
+def post_recipe(user):
     _FIELDS = ["user", "title", "description", "steps", "ingredients", "time_to_cook", "time_to_prepare", "skill_level"]
     missing_fields = []
 
@@ -116,6 +116,7 @@ def modify_recipe(user, recipe_id):
         'data': base_json,
         'msg': "Recipe Updated"
     }, 200
+
 
 @recipes.get('/<recipe_id>/reviews')
 @authed

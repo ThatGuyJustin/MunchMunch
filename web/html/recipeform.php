@@ -50,9 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'skill_level' => $skill_level
     ];
 
-    // API URL
-    $api_url = "http://backend:5000/api/recipes"; // Correct API endpoint
-
     // Send the API request using the util function
     $response = api_request_with_token("api/recipes", 'POST', $data);
 

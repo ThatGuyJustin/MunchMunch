@@ -15,12 +15,18 @@ media = Blueprint('media', __name__)
 
 @media.get("/avatars/<uid>/<media_hash>")
 def get_avatar(uid, media_hash):
+    if uid == "0":
+        return send_file(f"./static/default.png", as_attachment=False, mimetype="image/png", download_name="avatar.png")
+
     user = Users.get_or_none(id=uid)
     if not user:
         return "User Not Found.", 404
 
     pfp_hash = user.avatar or "default.png"
     path = "default" if not user.avatar else uid
+
+    if pfp_hash == "default.png":
+        return send_file(f"./static/default.png", as_attachment=False, mimetype="image/png", download_name=pfp_hash)
 
     picture = get_object(f"avatars/{path}", pfp_hash)
 
@@ -53,19 +59,24 @@ def update_avatar(user):
             return filename, 200
 
 
-@media.get("/recipe/<rid>/<image>/<hash>")
+@media.get("/recipe/<rid>/<image>/<media_hash>")
 def get_posts_media(rid, image, media_hash):
-    # Get post
+    VALID_TYPES = ["main", "step"]
+
+    real_media_type = image
 
     # Get image type
 
-    # Find image hash
+    picture = get_object(f"recipes/{rid}/{real_media_type}", media_hash)
+
+    if not picture:
+        return "Picture Not Found.", 404
 
     # Return Image
-    pass
+    return send_file(picture, as_attachment=False, mimetype=mimetypes.guess_type(media_hash)[0], download_name=media_hash)
 
 
-@media.post("/recipe/<rid>/<media>")
+@media.post("/recipe/<rid>/<media_type>")
 def upload_recipe_media(rid, media_type):
 
     VALID_TYPES = ["main", "step"]
@@ -93,4 +104,9 @@ def upload_recipe_media(rid, media_type):
         filename = generate_filename(file)
         size = os.fstat(file.fileno()).st_size
         upload_object(filename, file, size, f"recipes/{rid}/{real_media_type}")
+        rmedia = recipe.media
+        rmedia[real_media_type].append(filename)
+        recipe.update(set__media=rmedia)
+
+        return filename, 200
 

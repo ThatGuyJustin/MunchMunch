@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         if (isset($result['code']) && $result['code'] === 200) {
             // Registration successful, store user data in the session
-            set_user_session($result['user']['id'], $result['user']['username'], $result['token'] ?? '');
+            set_user_session($result['user']['id'], $result['user']['username'], $result['user']['token'] ?? '');
 
             // Redirect to welcome page
             header('Location: welcome.php');

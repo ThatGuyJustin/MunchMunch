@@ -2,7 +2,7 @@
 
 $NAV_HEADERS = <<<EOD
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 EOD;
@@ -26,12 +26,8 @@ $NAV_ICONS = <<<EOD
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="profile.php">Profile</a></li>
                 <li><a class="dropdown-item" href="account.php">Account Editing</a></li>
-                <li><a class="dropdown-item" href="notification.php">Notifications</a></li>
+                <li><a class="dropdown-item" href="notifications.php">Notifications</a></li>
                 <li><a class="dropdown-item" href="settings.php">Settings</a></li>
-                <li><a class="dropdown-item" href="recipeform.php">upload recipe</a></li>
-                <li><a class="dropdown-item" href="card.php">cards</a></li>
-                <li><a class="dropdown-item" href="contact.php">Conttact Admin</a></li>
-
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item text-danger" href="logout.php">Log Out</a></li>
             </ul>
@@ -40,7 +36,7 @@ $NAV_ICONS = <<<EOD
 </nav>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
 EOD;
 
 ?>

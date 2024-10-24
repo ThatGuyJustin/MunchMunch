@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from flask import Blueprint, request
@@ -16,15 +17,19 @@ def get_own_user(user):
     return {'code': 200, 'data': user.to_dict(), 'msg': None}, 200
 
 
-@users.get("/<uid>")
+@users.get("/<query>")
 @authed
-def get_user_by_id(user, uid):
-    to_get = User_model.get_or_none(id=uid)
+def get_user_by_id(user, query):
+    to_get = None
+    if query.isdigit():
+        to_get = User_model.get_or_none(id=query)
+    else:
+        to_get = User_model.get_or_none(username=query)
     return {
         'code': 200 if to_get else 404,
-        'data': to_get.to_dict(),
+        'data': to_get.to_dict() if to_get else {},
         'msg': "User found" if to_get else "User not found"
-    }, 200 if user else 404
+    }, 200 if to_get else 404
 
 
 @users.patch("/<uid>")
@@ -122,6 +127,8 @@ def get_recipes(user, uid):
     for post in query:
         base_json = json.loads(post.to_json())
         base_json['id'] = base_json["_id"]["$oid"]
+        formatted = post.created_at.strftime("%m.%d.%Y %H:%M")
+        base_json['created_at'] = formatted
         del base_json['_id']
         to_return.append(base_json)
 
