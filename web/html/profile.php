@@ -25,6 +25,8 @@ $uploaded_recipes = [];
 
 $favorited_recipes = [];
 
+$viewed_recipes = [];
+
 $user = null;
 if ($response['code'] != 200){
     $user = array(
@@ -60,6 +62,8 @@ if (!$is_error){
             $fav_response = api_request_with_token($api_path_favorites);
             $favorited_recipes = $fav_response['data'];
         }
+    }else{
+        $viewed_recipes = api_request_with_token("api/users/" . $user["id"] . "/history")["data"];
     }
 }
 
@@ -136,7 +140,7 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                                     <?php if (!empty($uploaded_recipes)): ?>
                                         <?php foreach ($uploaded_recipes as $recipe): ?>
                                             <li class="list-group-item">
-                                                <strong><a href="/card.php?recipe=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></a></strong> 
+                                                <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></a></strong> 
                                                 <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Uploaded on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
                                             </li>
                                         <?php endforeach; ?>
@@ -168,8 +172,8 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                                         <?php if (!empty($viewed_recipes)): ?> 
                                             <?php foreach ($viewed_recipes as $recipe): ?> 
                                                 <li class="list-group-item"> 
-                                                    <strong><?php echo htmlspecialchars($recipe['title']); ?></strong>  
-                                                    <span class="text-muted">(Viewed on <?php echo htmlspecialchars($recipe['viewed_at']); ?>)</span> 
+                                                    <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['recipe']['id']); ?>"><?php echo htmlspecialchars($recipe['recipe']['title']); ?></a></strong>  
+                                                    <span class="text-muted">(Viewed on <?php echo htmlspecialchars($recipe['timestamp']); ?>)</span> 
                                                 </li> 
                                             <?php endforeach; ?> 
                                         <?php else: ?> 

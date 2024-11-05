@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 
 from db import init_db, postgres_db
 from models.user import Users
+from routes.admin import admin
 from routes.user import users as users_api
 from routes.media import media
 from routes.recipes import recipes
@@ -195,4 +196,5 @@ if __name__ == '__main__':
     app.register_blueprint(media, url_prefix='/api/media')
     app.register_blueprint(tags, url_prefix='/api/tags')
     app.register_blueprint(recipes, url_prefix='/api/recipes')
+    app.register_blueprint(admin, url_prefix='/api/admin')
     app.run(host="0.0.0.0", debug=True)

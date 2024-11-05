@@ -34,12 +34,11 @@ $recipe = $recipe["data"];
 // Fetch the user who created the recipe
 $who_did_it = api_request_with_token("api/users/" . $recipe["user"]);
 
-$media_hash = isset($recipe["media_hash"]) ? $recipe["media_hash"] : null;
 $recipe_image_url = "image.png"; 
-
-if ($media_hash) {
-    $image_response = api_request_with_token("api/media/recipe/$recipe_id/main/$media_hash");
-    $recipe_image_url = isset($image_response['url']) ? $image_response['url'] : $recipe_image_url;
+$media_hash = null;
+if(count($recipe["media"]["main"]) > 0){
+    $media_hash = $recipe["media"]["main"][0];
+    $recipe_image_url = "api/media/recipe/$recipe_id/main/$media_hash";
 }
 
 ?>
