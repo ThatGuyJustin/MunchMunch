@@ -23,7 +23,7 @@ def make_request(user):
 
     initial_message = TicketMessage(user=user.id, message=rjson["message"], admin_message=('ADMIN' in user.account_flags))
 
-    ticket, created = Ticket.create(user=user.id, subject=rjson["subject"], messages=[asdict(initial_message)])
+    ticket = Ticket.create(user=user.id, subject=rjson["subject"], messages={'messages': [asdict(initial_message)]})
 
     return {'code': 200, "data": ticket.to_dict(), "msg": f"Ticket {ticket.id} Created"}, 200
 
@@ -47,7 +47,7 @@ def get_request(user, request_id):
     if req.user != user.id and not can_do_admin_requests(user):
         return {'code': 401, "data": {}, "msg": "Not Authorized."}, 401
 
-    return {'code': 200, "data": req.to_dict(), "msg": f"Ticket {req.ticket.id}"}, 200
+    return {'code': 200, "data": req.to_dict(), "msg": f"Ticket {req.id}"}, 200
 
 
 @admin.post("/requests/<request_id>/messages")
@@ -66,10 +66,10 @@ def add_message(user, request_id):
 
     msg = TicketMessage(user=user.id, message=rjson["message"], admin_message=('ADMIN' in user.account_flags))
 
-    req.messages.append(asdict(msg))
+    req.messages['messages'].append(asdict(msg))
     req.save()
 
-    return {'code': 200, "data": req.to_dict(), "msg": f"Message Added To Ticket {req.ticket.id}"}, 200
+    return {'code': 200, "data": req.to_dict(), "msg": f"Message Added To Ticket {req.id}"}, 200
 
 
 @admin.patch("/requests/<request_id>")
@@ -98,11 +98,11 @@ def update_request(user, request_id):
     if "assigned_to" in rjson:
         req.assigned_to = rjson["assigned_to"]
         req.save()
-        return {'code': 200, "data": {}, "msg": f"Ticket {req.ticket.id} Updated"}, 200
+        return {'code': 200, "data": {}, "msg": f"Ticket {req.id} Updated"}, 200
 
     if "status" in rjson:
         req.status = rjson["status"]
         req.save()
-        return {'code': 200, "data": {}, "msg": f"Ticket {req.ticket.id} Updated"}, 200
+        return {'code': 200, "data": {}, "msg": f"Ticket {req.id} Updated"}, 200
 
     return {'code': 400, "data": {}, "msg": "Ticket Not Updated."}, 400
