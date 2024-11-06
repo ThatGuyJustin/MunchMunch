@@ -2,7 +2,7 @@ import datetime
 from dataclasses import dataclass
 
 from peewee import AutoField, IntegerField, TextField
-from playhouse.postgres_ext import ArrayField, JSONField
+from playhouse.postgres_ext import ArrayField, BinaryJSONField
 
 from db import PostgresBase
 
@@ -31,7 +31,7 @@ class Ticket(PostgresBase):
     assigned_to = IntegerField(null=True)
     subject = TextField(unique=False, null=False)
     status = TextField(unique=False, null=False, default="pending")
-    messages = ArrayField(JSONField, default=[])
+    messages = BinaryJSONField(default={'messages': []})
 
     def to_dict(self):
         return {
@@ -40,5 +40,5 @@ class Ticket(PostgresBase):
             'assigned_to': self.assigned_to,
             'subject': self.subject,
             'status': self.status,
-            'messages': self.messages
+            'messages': self.messages['messages']
         }
