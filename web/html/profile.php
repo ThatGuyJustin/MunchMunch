@@ -25,6 +25,8 @@ $uploaded_recipes = [];
 
 $favorited_recipes = [];
 
+$viewed_recipes = [];
+
 $user = null;
 if ($response['code'] != 200){
     $user = array(
@@ -40,34 +42,33 @@ $api_path_recipes = "api/users/" . $user["id"] . "/recipes";
 $api_path_favorites = "api/users/" . $user["id"] . "/favorites";
 
 if (!$is_error){
-    if(in_array("PRIVATE_PROFILE", $user["account_flags"])){
-        $uploaded_recipes = [
-            ['title' => "This Account is private.", 'created_at' => '']
-        ];
-        $favorited_recipes = [
-            ['title' => "This Account is private.", 'created_at' => '']
-        ];
+    if($_SESSION['user_id'] != $user["id"]){
+        if(in_array("PRIVATE_PROFILE", $user["account_flags"])){
+            $uploaded_recipes = [
+                ['title' => "This Account is private.", 'created_at' => '']
+            ];
+            $favorited_recipes = [
+                ['title' => "This Account is private.", 'created_at' => '']
+            ];
+        }else{
+            $recipe_response = api_request_with_token($api_path_recipes);
+            $uploaded_recipes = $recipe_response['data'];
+        }
+        if(in_array("PRIVATE_FAVORITES", $user["account_flags"])){
+            $favorited_recipes = [
+                ['title' => "This Account is not sharing their favorites.", 'created_at' => '']
+            ];
+        }else{
+            $fav_response = api_request_with_token($api_path_favorites);
+            $favorited_recipes = $fav_response['data'];
+        }
     }else{
+        $viewed_recipes = api_request_with_token("api/users/" . $user["id"] . "/history")["data"];
         $recipe_response = api_request_with_token($api_path_recipes);
         $uploaded_recipes = $recipe_response['data'];
-    }
-    if(in_array("PRIVATE_FAVORITES", $user["account_flags"])){
-        $favorited_recipes = [
-            ['title' => "This Account is not sharing their favorites.", 'created_at' => '']
-        ];
-    }else{
         $fav_response = api_request_with_token($api_path_favorites);
         $favorited_recipes = $fav_response['data'];
     }
-
-    // $uploaded_recipes = [
-    //     ['title' => 'Spaghetti Carbonara', 'date' => '2024-09-28'],
-    //     ['title' => 'Chicken Curry', 'date' => '2024-10-02'],
-    // ];
-    // $favorited_recipes = [
-    //     ['title' => 'Vegan Brownies', 'date' => '2024-09-10'],
-    //     ['title' => 'Tacos al Pastor', 'date' => '2024-09-22'],
-    // ];
 }
 
 
@@ -111,7 +112,6 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                         <img src="<?php echo $profile_image_url; ?>" <?php if($is_error) echo("style='filter: grayscale(1);'"); ?>class="rounded-circle profile-img mb-3" alt="Profile Image">
                         <h4 class="card-title"><?php echo htmlspecialchars($user['name']); ?></h4>
                         <p class="text-muted">@<?php echo htmlspecialchars($user['username']); ?></p>
-                        <!-- <p><strong>Dietary Preferences:</strong> <?php echo htmlspecialchars($user['preferences']); ?></p> -->
                     </div>
                 </div>
             </div>
@@ -128,6 +128,11 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="favorited-tab" data-bs-toggle="tab" data-bs-target="#favorited" type="button" role="tab" aria-controls="favorited" aria-selected="false">Recipes Favorited</button>
                             </li>
+                            <?php if($_SESSION["user_id"] == $user["id"]): ?>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="favorited-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">History</button>
+                                </li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                     <div class="card-body">
@@ -139,7 +144,7 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                                     <?php if (!empty($uploaded_recipes)): ?>
                                         <?php foreach ($uploaded_recipes as $recipe): ?>
                                             <li class="list-group-item">
-                                                <strong><a href="/card.php?recipe=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></a></strong> 
+                                                <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></a></strong> 
                                                 <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Uploaded on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
                                             </li>
                                         <?php endforeach; ?>
@@ -155,8 +160,8 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                                     <?php if (!empty($favorited_recipes)): ?>
                                         <?php foreach ($favorited_recipes as $recipe): ?>
                                             <li class="list-group-item">
-                                                <strong><?php echo htmlspecialchars($recipe['title']); ?></strong> 
-                                                <!-- <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Favorited on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span> -->
+                                                <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></strong> 
+                                                <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Favorited on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
                                             </li>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -164,6 +169,24 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                                     <?php endif; ?>
                                 </ul>
                             </div>
+                            <!-- Viewed Recipes (History) --> 
+                            <?php if($_SESSION["user_id"] == $user["id"]): ?>
+                                <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab"> 
+                                    <ul class="list-group list-group-flush"> 
+                                        <?php if (!empty($viewed_recipes)): ?> 
+                                            <?php foreach ($viewed_recipes as $recipe): ?> 
+                                                <li class="list-group-item"> 
+                                                    <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['recipe']['id']); ?>"><?php echo htmlspecialchars($recipe['recipe']['title']); ?></a></strong>  
+                                                    <span class="text-muted">(Viewed on <?php echo htmlspecialchars($recipe['timestamp']); ?>)</span> 
+                                                </li> 
+                                            <?php endforeach; ?> 
+                                        <?php else: ?> 
+                                            <li class="list-group-item">No recently viewed recipes.</li> 
+                                        <?php endif; ?> 
+                                    </ul> 
+                                </div> 
+                            <?php endif; ?> 
+                        </div> 
                         </div>
                     </div>
                 </div>
@@ -172,3 +195,5 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
     </div>
 </body>
 </html>
+message.txt
+10 KB

@@ -18,6 +18,7 @@ class Post(Document):
     time_to_prepare = IntField()
     skill_level = IntField()
     reviews = ListField(DictField())
+    media = DictField(default={'main': [], 'step': []})
 
 
 @dataclass

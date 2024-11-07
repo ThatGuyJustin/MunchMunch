@@ -13,7 +13,7 @@ recipes = Blueprint('recipes', __name__)
 
 @recipes.post('/')
 @authed
-def post_recipe():
+def post_recipe(user):
     _FIELDS = ["user", "title", "description", "steps", "ingredients", "time_to_cook", "time_to_prepare", "skill_level"]
     missing_fields = []
 
@@ -116,6 +116,24 @@ def modify_recipe(user, recipe_id):
         'data': base_json,
         'msg': "Recipe Updated"
     }, 200
+
+
+@recipes.get("/random")
+@authed
+def random_recipe(user):
+    random = Post.objects.aggregate([{"$sample": {"size": 1}}])
+    base_recipe = next(random, None)
+
+    if base_recipe:
+        random_recipe = Post._from_son(base_recipe)
+        base_json = json.loads(random_recipe.to_json())
+        base_json['id'] = base_json["_id"]["$oid"]
+        del base_json['_id']
+
+        return {'code': 200, 'data': base_json, 'msg': "Random Recipe"}, 200
+    else:
+        return "No recipe found", 404
+
 
 @recipes.get('/<recipe_id>/reviews')
 @authed

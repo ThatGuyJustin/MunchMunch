@@ -5,6 +5,7 @@ from flask import Blueprint, request
 
 from models.history import History
 from models.post import Post
+from models.shopping import ShoppingList
 from models.user import Users as User_model
 from util.auth import authed, can_do_admin_requests
 
@@ -144,7 +145,17 @@ def get_user_favorites(user, uid):
     if "PRIVATE_FAVORITES" in u.account_flags and not can_do_admin_requests(user) and int(uid) != int(user.id):
         return {"code": 403, "data": {}, "msg": "User's Favorites Are Private."}, 403
 
-    return {"code": 200, "data": u.favorite_posts, "msg": None}, 200
+    to_return = []
+    for fav in u.favorite_posts:
+        recipe = Post.objects(id=fav).get()
+        base_json = json.loads(recipe.to_json())
+        base_json['id'] = base_json["_id"]["$oid"]
+        formatted = recipe.created_at.strftime("%m.%d.%Y %H:%M")
+        base_json['created_at'] = formatted
+        del base_json['_id']
+        to_return.append(base_json)
+
+    return {"code": 200, "data": to_return, "msg": None}, 200
 
 
 @users.post("/<uid>/history")
@@ -180,6 +191,47 @@ def get_history(user, uid):
     for history_obj in query:
         base_json = json.loads(history_obj.to_json())
         base_json['recipe'] = base_json["recipe"]["$oid"]
+        base_json['id'] = base_json["_id"]
+        bformatted = history_obj.timestamp.strftime("%m.%d.%Y %H:%M")
+        base_json['timestamp'] = bformatted
+        del base_json['_id']
+        r = Post.objects(id=base_json['recipe']).get()
+        recipe_json = json.loads(r.to_json())
+        recipe_json['id'] = recipe_json["_id"]["$oid"]
+        formatted = r.created_at.strftime("%m.%d.%Y %H:%M")
+        recipe_json['created_at'] = formatted
+        del recipe_json['_id']
+        base_json['recipe'] = recipe_json
         to_return.append(base_json)
 
     return {"code": 200, "data": to_return, "msg": None}, 200
+
+
+@users.post("/<uid>/shopping-list")
+@authed
+def post_shopping_list(user, uid):
+    rjson = request.get_json()
+
+    new_list = ShoppingList(**rjson, user=uid).save()
+
+    return {"code": 200, "data":  json.loads(new_list.to_json()), "msg": None}, 200
+
+
+@users.get("/<uid>/shopping-list")
+@authed
+def get_shopping_list(user, uid):
+    slist = ShoppingList.objects.get(user=user.id)
+
+    return {"code": 200, "data":  json.loads(slist.to_json()), "msg": None}, 200
+
+
+@users.patch("/<uid>/shopping-list")
+@authed
+def patch_shopping_list(user, uid):
+    rjson = request.get_json()
+    slist = ShoppingList.objects.get(user=user.id)
+
+    updated = slist.update(**rjson)
+    slist.reload()
+
+    return {"code": 200, "data": json.loads(slist.to_json()), "msg": None}, 200

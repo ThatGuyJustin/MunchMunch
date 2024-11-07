@@ -50,38 +50,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'skill_level' => $skill_level
     ];
 
-    // API URL
-    $api_url = "http://backend:5000/api/recipes"; // Correct API endpoint
+    // Initialize cURL to send the recipe data
+    $recipe_response = api_request_with_token('api/recipes', 'POST', $data);
 
-    // Initialize cURL
-    $ch = curl_init($api_url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
+    if (isset($recipe_response['code']) && $recipe_response['code'] === 200) {
+        $recipe_id = $recipe_response['data']['id']; // Get the recipe ID
 
-    // Execute the request
-    $response = curl_exec($ch);
+        // Handle the image upload
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+            $image = $_FILES['image'];
 
-    // Check for cURL errors
-    if ($response === false) {
-        $error_message = 'Curl error: ' . curl_error($ch);
-    } else {
-        $result = json_decode($response, true);
+            // API URL to upload the image
+            $image_upload_url = "api/media/recipe/$recipe_id/main"; // Assuming 'main' is the image type
 
-        if (isset($result['code']) && $result['code'] === 200) {
-            $success_message = "Recipe submitted successfully!";
-            header('Location: card.php?id=' . $result["data"]["id"]);
+            // Upload the image using cURL
+            $image_response = api_request_with_token($image_upload_url, 'POST', null, $image);
+
+            if (isset($image_response['code']) && $image_response['code'] === 200) {
+                $success_message = "Recipe and image uploaded successfully!";
+            } else {
+                $error_message = "Recipe created but failed to upload the image.";
+            }
         } else {
-            $error_message = "Error submitting recipe. API response: " . json_encode($result);
+            $success_message = "Recipe submitted successfully!";
         }
-    }
 
-    curl_close($ch);
+        header('Location: recipe.php?id=' . $recipe_id);
+        exit();
+    } else {
+        $error_message = "Error submitting recipe. API response: " . json_encode($recipe_response);
+    }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -167,10 +167,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-    <?php include 'nav.php'; ?> 
+<?php include 'nav.php'; ?> 
     <div class="container">
         <h1>Upload a Recipe</h1>
-
 
         <?php if (!empty($success_message)): ?>
             <div class="message success-message"><?php echo htmlspecialchars($success_message); ?></div>
@@ -179,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="message error-message"><?php echo htmlspecialchars($error_message); ?></div>
         <?php endif; ?>
 
-        <form method="post">
+        <form method="post" enctype="multipart/form-data"> <!-- Add enctype for file upload -->
             <label for="title">Recipe Title:</label>
             <input type="text" name="title" id="title" required>
 
@@ -220,6 +219,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <label for="skill_level">Skill Level (1-10):</label>
             <input type="number" name="skill_level" id="skill_level" min="1" max="10" required>
+
+            <label for="image">Recipe Image:</label>
+            <input type="file" name="image" id="image" accept="image/*">
 
             <button type="submit">Submit Recipe</button>
         </form>
