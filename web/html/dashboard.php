@@ -73,7 +73,7 @@ if (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
             <img src="<?php echo htmlspecialchars($recipe_image_url); ?>" class="card-img-top" alt="Recipe Image">
             <div class="card-body text-center">
             <h5 class="card-title">
-                 <a href="recipeinfo.php?id=<?php echo htmlspecialchars($recipe["id"]); ?>">
+                 <a href="recipe.php?id=<?php echo htmlspecialchars($recipe["id"]); ?>">
                  <?php echo htmlspecialchars($recipe["title"]); ?>
                  </a>
             </h5>

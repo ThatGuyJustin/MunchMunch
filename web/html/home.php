@@ -70,7 +70,7 @@ if (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
         <div class="card-body text-center">
             <!-- Recipe Title Link -->
             <h5 class="card-title">
-                <a href="recipeinfo.php?id=<?php echo htmlspecialchars($recipe["id"]); ?>">
+                <a href="recipe.php?id=<?php echo htmlspecialchars($recipe["id"]); ?>">
                     <?php echo htmlspecialchars($recipe["title"]); ?>
                 </a>
             </h5>
@@ -81,7 +81,7 @@ if (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
     <div class="button-container">
         <button onclick="fetchRandomRecipe('prev')" class="btn btn-primary">Previous</button>
         <button onclick="fetchRandomRecipe('next')" class="btn btn-primary">Next</button>
-        <a href="recipeinfo.php?id=<?php echo htmlspecialchars($recipe_id); ?>">
+        <a href="recipe.php?id=<?php echo htmlspecialchars($recipe_id); ?>">
             <button>Cook!</button>
         </a>
     </div>
