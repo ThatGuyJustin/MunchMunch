@@ -32,9 +32,14 @@ def make_request(user):
 @authed
 def get_pending_requests(user):
     if not can_do_admin_requests(user):
-        return {'code': 401, "data": {}, "msg": "Not Authorized."}, 401
+        raw_tickets = list(Ticket.select().where(Ticket.user == user.id))
+        tickets = [ticket.to_dict() for ticket in raw_tickets]
+        return {'code': 200, "data": tickets, "msg": "User's tickets"}, 200
 
-    return {'code': 501, "data": {}, "msg": "NYI"}, 501
+    raw_tickets = list(Ticket.select())
+    tickets = [ticket.to_dict() for ticket in raw_tickets]
+
+    return {'code': 200, "data": tickets, "msg": "All Tickets"}, 200
 
 
 @admin.get("/requests/<request_id>")
