@@ -64,6 +64,10 @@ if (!$is_error){
         }
     }else{
         $viewed_recipes = api_request_with_token("api/users/" . $user["id"] . "/history")["data"];
+        $recipe_response = api_request_with_token($api_path_recipes);
+        $uploaded_recipes = $recipe_response['data'];
+        $fav_response = api_request_with_token($api_path_favorites);
+        $favorited_recipes = $fav_response['data'];
     }
 }
 
@@ -156,8 +160,8 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                                     <?php if (!empty($favorited_recipes)): ?>
                                         <?php foreach ($favorited_recipes as $recipe): ?>
                                             <li class="list-group-item">
-                                                <strong><?php echo htmlspecialchars($recipe['title']); ?></strong> 
-                                                <!-- <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Favorited on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span> -->
+                                                <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></strong> 
+                                                <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Favorited on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
                                             </li>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -191,3 +195,5 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
     </div>
 </body>
 </html>
+message.txt
+10 KB

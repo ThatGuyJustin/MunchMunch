@@ -50,9 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'skill_level' => $skill_level
     ];
 
-    // API URL to create the recipe
-    $api_url = "http://backend:5000/api/recipes"; // Correct API endpoint
-
     // Initialize cURL to send the recipe data
     $recipe_response = api_request_with_token('api/recipes', 'POST', $data);
 
@@ -64,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $image = $_FILES['image'];
 
             // API URL to upload the image
-            $image_upload_url = "http://backend:5000/api/media/recipe/$recipe_id/main"; // Assuming 'main' is the image type
+            $image_upload_url = "api/media/recipe/$recipe_id/main"; // Assuming 'main' is the image type
 
             // Upload the image using cURL
             $image_response = api_request_with_token($image_upload_url, 'POST', null, $image);
@@ -78,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success_message = "Recipe submitted successfully!";
         }
 
-        header('Location: card.php?id=' . $recipe_id);
+        header('Location: recipe.php?id=' . $recipe_id);
         exit();
     } else {
         $error_message = "Error submitting recipe. API response: " . json_encode($recipe_response);
