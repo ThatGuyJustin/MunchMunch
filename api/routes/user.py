@@ -5,6 +5,7 @@ from flask import Blueprint, request
 
 from models.history import History
 from models.post import Post
+from models.shopping import ShoppingList
 from models.user import Users as User_model
 from util.auth import authed, can_do_admin_requests
 
@@ -204,3 +205,33 @@ def get_history(user, uid):
         to_return.append(base_json)
 
     return {"code": 200, "data": to_return, "msg": None}, 200
+
+
+@users.post("/<uid>/shopping-list")
+@authed
+def post_shopping_list(user, uid):
+    rjson = request.get_json()
+
+    new_list = ShoppingList(**rjson, user=uid).save()
+
+    return {"code": 200, "data":  json.loads(new_list.to_json()), "msg": None}, 200
+
+
+@users.get("/<uid>/shopping-list")
+@authed
+def get_shopping_list(user, uid):
+    slist = ShoppingList.objects.get(user=user.id)
+
+    return {"code": 200, "data":  json.loads(slist.to_json()), "msg": None}, 200
+
+
+@users.patch("/<uid>/shopping-list")
+@authed
+def patch_shopping_list(user, uid):
+    rjson = request.get_json()
+    slist = ShoppingList.objects.get(user=user.id)
+
+    updated = slist.update(**rjson)
+    slist.reload()
+
+    return {"code": 200, "data": json.loads(slist.to_json()), "msg": None}, 200

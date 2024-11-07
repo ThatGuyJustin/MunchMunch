@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             set_user_session($result['user']['id'], $result['user']['username'], $result['user']['token'] ?? '');
 
             // Redirect to welcome page
-            header('Location: welcome.php');
+            header('Location: logout.php');
             exit();
         } else {
             $error_message = isset($result['msg']) ? $result['msg'] : 'Registration failed.';
