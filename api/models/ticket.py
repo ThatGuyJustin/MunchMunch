@@ -31,7 +31,7 @@ class Ticket(PostgresBase):
     assigned_to = IntegerField(null=True)
     subject = TextField(unique=False, null=False)
     status = TextField(unique=False, null=False, default="pending")
-    messages = ArrayField(BinaryJSONField, default=[])
+    messages = BinaryJSONField(default={'messages': []})
 
     def to_dict(self):
         return {
