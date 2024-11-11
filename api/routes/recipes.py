@@ -205,6 +205,12 @@ def review_recipe(user, recipe_id):
         }, 400
 
 
+@recipes.route("/recommended")
+@authed
+def recommended_recipe(user):
+    pass
+
+
 @recipes.route("/testing", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
