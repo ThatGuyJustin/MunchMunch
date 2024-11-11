@@ -16,7 +16,14 @@ def authed(f):
     def decorated(*args, **kwargs):
         token = None
         if "Authorization" in request.headers:
-            token = request.headers["Authorization"].split(" ")[1]
+            try:
+                token = request.headers["Authorization"].split(" ")[1]
+            except IndexError as e:
+                return {
+                    "message": "Malformed Authorization Header",
+                    "data": None,
+                    "error": "Unauthorized"
+                }, 401
         if not token:
             return {
                 "message": "Missing Authorization Token",
@@ -45,3 +52,10 @@ def authed(f):
         return f(current_user, *args, **kwargs)
 
     return decorated
+
+
+def can_do_admin_requests(user) -> bool:
+    try:
+        return "ADMIN" in user.account_flags
+    except Exception as e:
+        return False

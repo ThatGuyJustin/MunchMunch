@@ -1,6 +1,7 @@
+import datetime
 import re
 
-from peewee import AutoField, TextField, IntegerField
+from peewee import AutoField, TextField, IntegerField, DateTimeField
 from playhouse.postgres_ext import ArrayField, JSONField
 from werkzeug.security import check_password_hash
 
@@ -16,7 +17,9 @@ class Users(PostgresBase):
 
     id = AutoField()
     username = TextField(unique=True)
+    bio = TextField(null=True)
     name = TextField(null=True)
+    created_at = DateTimeField(default=datetime.datetime.now(datetime.UTC))
     email = TextField(unique=True)
     account_flags = ArrayField(TextField, default=[])
     favorite_posts = ArrayField(TextField, default=[])
@@ -24,15 +27,11 @@ class Users(PostgresBase):
     avatar = TextField(null=True)
     following = ArrayField(IntegerField, default=[])
     followers = ArrayField(IntegerField, default=[])
-    preferences = JSONField(null=True)
+    preferences = JSONField(default={"dietary": []})
 
     def to_dict(self):
-        base = {"id": self.id, "username": self.username, "name": self.name or self.username, "email": self.email, "avatar": self.avatar or "default.png",
-                'following': self.following, 'followers': self.followers, 'preferences': self.preferences}
-        if self.account_flags:
-            base["account_flags"] = self.account_flags
-        if self.favorite_posts:
-            base["favorite_posts"] = self.favorite_posts
+        base = {"id": self.id, "username": self.username, "bio": self.bio, "name": self.name or self.username, "email": self.email, "avatar": self.avatar or "default.png",
+                'following': self.following, 'followers': self.followers, 'preferences': self.preferences, 'created_at': self.created_at, 'account_flags': self.account_flags, 'favorite_posts': self.favorite_posts}
         return base
 
     @classmethod

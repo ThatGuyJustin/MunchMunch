@@ -1,17 +1,19 @@
 import json
+from dataclasses import asdict
 
 from flask import Blueprint, request, redirect
 from mongoengine import DoesNotExist
 
-from models.post import Post
-from util.auth import authed
+from models.post import Post, Review
+from models.user import Users
+from util.auth import authed, can_do_admin_requests
 
 recipes = Blueprint('recipes', __name__)
 
 
 @recipes.post('/')
-# @authed
-def post_recipe():
+@authed
+def post_recipe(user):
     _FIELDS = ["user", "title", "description", "steps", "ingredients", "time_to_cook", "time_to_prepare", "skill_level"]
     missing_fields = []
 
@@ -52,6 +54,7 @@ def get_recipe(post_id):
         }, 404
     base_json = json.loads(recipe.to_json())
     base_json['id'] = base_json["_id"]["$oid"]
+    base_json['reviews'] = len(base_json['reviews'])
     del base_json['_id']
     return {
         'code': 200,
@@ -61,7 +64,8 @@ def get_recipe(post_id):
 
 
 @recipes.patch('/<recipe_id>')
-def modify_recipe(recipe_id):
+@authed
+def modify_recipe(user, recipe_id):
     rjson = request.get_json()
 
     if not rjson:
@@ -75,10 +79,10 @@ def modify_recipe(recipe_id):
 
     DISALLOWED_FIELDS = ["id", "user"]
 
-    # TODO: Skip if the user is an Admin
-    for field in rjson:
-        if field in DISALLOWED_FIELDS:
-            to_remove.append(field)
+    if not can_do_admin_requests(user):
+        for field in rjson:
+            if field in DISALLOWED_FIELDS:
+                to_remove.append(field)
 
     if len(to_remove) > 0:
         return {
@@ -97,7 +101,7 @@ def modify_recipe(recipe_id):
 
     updated = recipe.update(**rjson)
     recipe.reload()
-    if updated is 0:
+    if updated == 0:
         return {
             'code': 500,
             'msg': "Internal Error. Recipe update unsuccessful.",
@@ -112,6 +116,93 @@ def modify_recipe(recipe_id):
         'data': base_json,
         'msg': "Recipe Updated"
     }, 200
+
+
+@recipes.get("/random")
+@authed
+def random_recipe(user):
+    random = Post.objects.aggregate([{"$sample": {"size": 1}}])
+    base_recipe = next(random, None)
+
+    if base_recipe:
+        random_recipe = Post._from_son(base_recipe)
+        base_json = json.loads(random_recipe.to_json())
+        base_json['id'] = base_json["_id"]["$oid"]
+        del base_json['_id']
+
+        return {'code': 200, 'data': base_json, 'msg': "Random Recipe"}, 200
+    else:
+        return "No recipe found", 404
+
+
+@recipes.get('/<recipe_id>/reviews')
+@authed
+def get_recipe_reviews(user, recipe_id):
+    try:
+        recipe = Post.objects.get(id=recipe_id)
+    except DoesNotExist:
+        return {
+            'code': 404,
+            'msg': "Recipe not found",
+            'data': {}
+        }, 404
+    
+    base_json = json.loads(recipe.to_json())
+    base_json['id'] = base_json["_id"]["$oid"]
+    reviews = base_json['reviews']
+    new_reviews = []
+    for review in reviews:
+        user = Users.get_or_none(id=review['user'])
+        if not user:
+            review['user'] = {
+                "username": f"deleted_user_{review['user']}",
+                "name": "Deleted User",
+                "avatar": "default.png"
+            }
+        else:
+            review['user'] = user.to_dict()
+
+        new_reviews.append(review)
+
+    return {'code': 200, 'data': new_reviews, 'msg': ''}, 200
+
+
+@recipes.post("/<recipe_id>/reviews")
+@authed
+def review_recipe(user, recipe_id):
+    try:
+        recipe = Post.objects.get(id=recipe_id)
+    except DoesNotExist:
+        return {
+            'code': 404,
+            'msg': "Recipe not found",
+            'data': {}
+        }, 404
+
+    rjson = request.get_json()
+    if not rjson:
+        return {
+            'code': 406,
+            'msg': "Missing Data",
+            'data': {}
+        }, 406
+
+    re = Review(**rjson, user=user.id)
+
+    updooted = recipe.update(add_to_set__reviews=asdict(re))
+    recipe.reload()
+    if updooted != 0:
+        return {
+            'code': 200,
+            'msg': "Review Added",
+            'data': {}
+        }, 200
+    else:
+        return {
+            'code': 400,
+            'msg': "Review Not Added",
+            'data': {}
+        }, 400
 
 
 @recipes.route("/testing", methods=["GET", "POST"])

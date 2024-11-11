@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 
 from db import init_db, postgres_db
 from models.user import Users
+from routes.admin import admin
 from routes.user import users as users_api
 from routes.media import media
 from routes.recipes import recipes
@@ -64,14 +65,11 @@ def reset_backend():
 
 @api.get('/media/test/<hash_id>')
 def test_get_media(hash_id):
-    print(hash_id)
     if not hash_id:
         return "Media Not Found", 404
     else:
         try:
             req = app.s3_client.get_object(app.config['S3_BUCKET'], "yoshi/" + hash_id)
-            print(dict(req.headers).items())
-            print(dir(req))
             data = BytesIO(req.read())
             req.close()
             return send_file(data, as_attachment=False, mimetype=mimetypes.guess_type(hash_id)[0], download_name=hash_id)
@@ -198,4 +196,5 @@ if __name__ == '__main__':
     app.register_blueprint(media, url_prefix='/api/media')
     app.register_blueprint(tags, url_prefix='/api/tags')
     app.register_blueprint(recipes, url_prefix='/api/recipes')
+    app.register_blueprint(admin, url_prefix='/api/admin')
     app.run(host="0.0.0.0", debug=True)

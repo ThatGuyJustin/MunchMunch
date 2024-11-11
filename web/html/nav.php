@@ -1,158 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <!-- font awesome for icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <title>Dashboard</title>
-   
-    <style>
-        body 
-        {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
+<?php 
 
-        .menu 
-        {
-            position: fixed;
-            top: 10px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
+$NAV_HEADERS = <<<EOD
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+EOD;
 
+$NAV_ICONS = <<<EOD
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="index.php">FoodTinder</a>
+        
+        <!-- Search Button -->
+        <form class="d-flex me-auto">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
 
-        .profile-icon 
-        {
-    background-color: #007bff;
-    color: white;
-    padding: 12px; 
-    border-radius: 50%;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center; 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    font-size: 22px;
-    cursor: pointer;
-    user-select: none;
-}
-
-        .profile-icon:hover 
-        {
-            background-color: #0056b3;
-        }
-
-        .dropdown 
-        {
-            display: none;
-            position: absolute;
-            top: 50px;
-            right: 0;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-            z-index: 1;
-            user-select: none;
-        }
-
-        .dropdown a 
-        {
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-            text-decoration: none;
-            color: white;
-            background-color: #6c757d;
-            font-size: 14px;
-            user-select: none;
-        }
-
-        .dropdown a:hover 
-        {
-            background-color: #5a6268;
-        }
-
-        .dropdown a i 
-        {
-            margin-right: 8px;
-        }
-
-        /* Search button on the left */
-        .search-button 
-        {
-            position: fixed;
-            top: 10px;
-            left: 20px;
-            background-color: #28a745;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 50px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            font-size: 14px;
-            user-select: none;
-        }
-
-        .search-button:hover 
-        {
-            background-color: #218838;
-        }
-
-        .search-button i 
-        {
-            margin-right: 8px;
-        }
-
-    </style>
-</head>
-<body>
-
-    <a href="search.php" class="search-button">
-        <i class="fas fa-search"></i>Search
-    </a>
-
-    <div class="menu">
-        <div class="profile-icon" onclick="toggleDropdown()">
-            <i class="fa-regular fa-user"></i>
-        </div>
-        <div class="dropdown" id="dropdown-menu">
-            <a href="profile.php"><i class="fa-regular fa-user"></i>Your Profile</a>
-            <a href="account.php"><i class="fas fa-user-cog"></i>Account</a>
-            <a href="edit-profile.php"><i class="fas fa-edit"></i>Edit Profile</a>
-            <a href="notifications.php"><i class="fas fa-bell"></i>Notifications</a>
-            <a href="settings.php"><i class="fas fa-cog"></i>Settings</a>
-            <a href="logout.php"><i class="fas fa-sign-out-alt"></i>Log Out</a>
+        <!-- Right Side Dropdown -->
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-regular fa-user"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="profile.php"><i class="fa-regular fa-user"></i> Profile</a></li>
+                <li><a class="dropdown-item" href="account.php"><i class="fa-regular fa-pen-to-square"></i> Account Editing</a></li>
+                <li><a class="dropdown-item" href="notifications.php"><i class="fa-regular fa-bell"></i> Notifications</a></li>
+                <li><a class="dropdown-item" href="settings.php"><i class="fa-solid fa-user-gear"></i> Settings</a></li>
+                <li><a class="dropdown-item" href="recipeform.php"><i class="fa-regular fa-clipboard"></i> Create Recipe</a></li> 
+                <li><a class="dropdown-item" href="contact.php"><i class="fa-solid fa-ticket"></i> Contact Admin</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="logout.php"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a></li>
+            </ul>
         </div>
     </div>
+</nav>
 
-    <script>
-        function toggleDropdown() 
-        {
-            const dropdown = document.getElementById('dropdown-menu');
-            event.preventDefault();
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+EOD;
 
-        window.onclick = function(event)
-         {
-            if (!event.target.matches('.profile-icon')) 
-            {
-                const dropdown = document.getElementById('dropdown-menu');
-                if (dropdown.style.display === 'block')
-                 {
-                    dropdown.style.display = 'none';
-                }
-            }
-        };
-    </script>
-
-</body>
-</html>
+?>
