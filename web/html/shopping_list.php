@@ -9,25 +9,48 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Initialize variables for storing recipes and ingredients
-$shopping_list_recipes = [];
-$ingredient_list = [];
+// Test data for displaying the shopping list without API calls
+$shopping_list_recipes = [
+    ["name" => "Spaghetti Bolognese"],
+    ["name" => "Chicken Caesar Salad"],
+    ["name" => "Beef Tacos"]
+];
+
+$ingredient_list = [
+    "Spaghetti" => 200,
+    "Ground Beef" => 500,
+    "Tomato Sauce" => 1,
+    "Lettuce" => 1,
+    "Chicken Breast" => 300,
+    "Taco Shells" => 6
+];
 
 // Fetch the shopping list for the current user
-$api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/shopping-list";
-$shopping_list_response = api_request_with_token($api_path_shopping_list);
+// $api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/shopping-list";
+// $shopping_list_response = api_request_with_token($api_path_shopping_list);
 
-if ($shopping_list_response['code'] === 200) {
-    $shopping_list_data = $shopping_list_response['data'];
-    $shopping_list_recipeIDs = $shopping_list_data['recipes']; // List of recipe IDs
-    $ingredient_list = $shopping_list_data['ingredients']; 
-} else {
-    echo "Failed to load shopping list.";
-    exit();
-}
-$api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/recipes";
-$shopping_list_response = api_request_with_token($api_path_shopping_list);
+// if ($shopping_list_response['code'] === 200) {
+//     $shopping_list_data = $shopping_list_response['data'];
+    
+//     // Aggregate ingredient quantities
+//     foreach ($shopping_list_data['ingredients'] as $ingredient => $quantity) {
+//         if (isset($ingredient_list[$ingredient])) {
+//             $ingredient_list[$ingredient] += $quantity; // Sum quantities of the same ingredient
+//         } else {
+//             $ingredient_list[$ingredient] = $quantity;
+//         }
+//     }
 
+//     // Extract recipes from raw_recipes using recipe IDs in shopping list
+//     foreach ($shopping_list_data['recipes'] as $recipe_id) {
+//         if (isset($shopping_list_data['raw_recipes'][$recipe_id])) {
+//             $shopping_list_recipes[] = $shopping_list_data['raw_recipes'][$recipe_id]; // Store recipe data
+//         }
+//     }
+// } else {
+//     echo "Failed to load shopping list.";
+//     exit();
+// }
 ?>
 
 <!DOCTYPE html>
@@ -54,13 +77,12 @@ $shopping_list_response = api_request_with_token($api_path_shopping_list);
 <body>
 <?php echo($NAV_ICONS); ?>
 
-
 <div class="container mt-5">
     <h2 class="centered-title">Shopping List</h2>
     <div class="row">
-        <!-- Ingredient List -->
-        <div class="col-md-8 shopping-list-box">
-            <h4>Ingredients</h4>
+        <!-- Ingredient List on the left -->
+        <div class="col-md-6 shopping-list-box">
+            <h4>Ingredients to Buy</h4>
             <ul class="list-group">
                 <?php foreach ($ingredient_list as $ingredient => $quantity): ?>
                     <li class="list-group-item">
@@ -69,8 +91,18 @@ $shopping_list_response = api_request_with_token($api_path_shopping_list);
                 <?php endforeach; ?>
             </ul>
         </div>
-        
-       
+
+        <!-- Recipe List on the right -->
+        <div class="col-md-6 recipe-list-box">
+            <h4>Included Recipes</h4>
+            <ul class="list-group">
+                <?php foreach ($shopping_list_recipes as $recipe): ?>
+                    <li class="list-group-item">
+                        <?php echo htmlspecialchars($recipe['name']); ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
     </div>
 </div>
 

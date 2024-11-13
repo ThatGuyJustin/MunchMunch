@@ -88,29 +88,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($response && $response['code'] === 200) {
         $success_message = "Review submitted successfully!";
         // Reload the page to show the new review
-        header("Location: recipe.php?id=$recipe_id");
+        header("Location: test.php?id=$recipe_id");
         exit();
     } else {
         $error_message = isset($response['msg']) ? $response['msg'] : "Failed to submit the review.";
     }
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'])) {
-    $add_to_shopping_data = [
-        'recipes' => [$recipe_id],
-        'ingredients' => $recipe["ingredients"]
-    ];
 
-    $response = api_request_with_token("api/users/$user_id/shopping-list", "POST", $add_to_shopping_data);
 
-    if ($response && $response['code'] === 200) {
-        $success_message = "Recipe added to shopping list!";
-    } else {
-        $error_message = isset($response['msg']) ? $response['msg'] : "Failed to add to shopping list.";
-    }
-}
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -182,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
                 <?php if (!empty($error_message)): ?>
                     <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
                 <?php endif; ?>
-                <form action="recipe.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+                <form action="test.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
                     <div class="mb-3">
                         <!-- <label for="rating" class="form-label">Rating (1-5):</label>
                         <input type="number" name="rating" class="form-control" min="1" max="5" required> -->
@@ -200,7 +186,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
 <!-- Add to Shopping List Button -->
 <div class="row mt-5">
     <div class="col-12">
-        <form action="recipe.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+        <form action="test.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+            <input type="hidden" id="add_to_shopping_list" name="add_to_shopping_list" value=<?php echo htmlspecialchars($recipe_id); ?>>
             <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
         </form>
     </div>
