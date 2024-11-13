@@ -114,7 +114,7 @@ if(count($recipe["media"]["main"]) > 0){
 
     <!-- Buttons Section -->
     <div class="buttons">
-        <a href="recipeinfo.php?id=<?php echo htmlspecialchars($recipe_id); ?>">
+        <a href="recipe.php?id=<?php echo htmlspecialchars($recipe_id); ?>">
             <button>Cook!</button>
         </a>
         <button id="favorite_button">Save for later</button>

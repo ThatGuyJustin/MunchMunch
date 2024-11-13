@@ -3,9 +3,22 @@ from dataclasses import asdict
 from flask import Blueprint, request
 
 from models.ticket import Ticket, TicketMessage
+from models.user import Users
 from util.auth import authed, can_do_admin_requests
 
 admin = Blueprint('admin', __name__)
+
+
+def attach_user_objects(ticket: Ticket):
+    raw_ticket = ticket.to_dict()
+    raw_ticket['user'] = Users.get(raw_ticket['user']).to_dict()
+    new_messages = []
+    for message in raw_ticket['messages']:
+        message['user'] = Users.get(message['user']).to_dict()
+        new_messages.append(message)
+    raw_ticket['messages'] = new_messages
+
+    return raw_ticket
 
 
 @admin.post("/requests")
@@ -25,16 +38,21 @@ def make_request(user):
 
     ticket = Ticket.create(user=user.id, subject=rjson["subject"], messages={'messages': [asdict(initial_message)]})
 
-    return {'code': 200, "data": ticket.to_dict(), "msg": f"Ticket {ticket.id} Created"}, 200
+    return {'code': 200, "data": attach_user_objects(ticket), "msg": f"Ticket {ticket.id} Created"}, 200
 
 
 @admin.get("/requests")
 @authed
 def get_pending_requests(user):
     if not can_do_admin_requests(user):
-        return {'code': 401, "data": {}, "msg": "Not Authorized."}, 401
+        raw_tickets = list(Ticket.select().where(Ticket.user == user.id))
+        tickets = [ticket.to_dict() for ticket in raw_tickets]
+        return {'code': 200, "data": tickets, "msg": "User's tickets"}, 200
 
-    return {'code': 501, "data": {}, "msg": "NYI"}, 501
+    raw_tickets = list(Ticket.select())
+    tickets = [attach_user_objects(ticket) for ticket in raw_tickets]
+
+    return {'code': 200, "data": tickets, "msg": "All Tickets"}, 200
 
 
 @admin.get("/requests/<request_id>")
@@ -47,7 +65,7 @@ def get_request(user, request_id):
     if req.user != user.id and not can_do_admin_requests(user):
         return {'code': 401, "data": {}, "msg": "Not Authorized."}, 401
 
-    return {'code': 200, "data": req.to_dict(), "msg": f"Ticket {req.id}"}, 200
+    return {'code': 200, "data": attach_user_objects(req), "msg": f"Ticket {req.id}"}, 200
 
 
 @admin.post("/requests/<request_id>/messages")
