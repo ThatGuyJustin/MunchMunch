@@ -7,17 +7,15 @@ start_session();
 $error_message = '';
 $success_message = '';
 
-// Fetch all ticket requests
+// Get all ticket requests
 $tickets = api_request_with_token("api/admin/requests", "GET");
 
-// Get the current ticket ID from the URL parameter (if available)
 $current_ticket_id = $_GET['ticket_id'] ?? null;
 
-// Handle form submission for updating tickets
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $ticket_id = $_POST['ticket_id'] ?? null; // Ensure ticket_id is set
+    $ticket_id = $_POST['ticket_id'] ?? null; 
 
-    if ($ticket_id) { // Only proceed if ticket_id is not empty
+    if ($ticket_id) { 
         $status = $_POST['status'] ?? null;
         $assigned_to = $_POST['assigned_to'] ?? null;
         $response_message = $_POST['response_message'] ?? null;
@@ -31,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($update_data)) {
             $update_response = api_request_with_token("api/admin/requests/$ticket_id", "PATCH", $update_data);
 
-            // Log the response for debugging
             error_log("Update response: " . json_encode($update_response));
 
             if (isset($update_response['code']) && $update_response['code'] === 200) {
@@ -46,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response_data = ['message' => $response_message];
             $message_response = api_request_with_token("api/admin/requests/$ticket_id/messages", "POST", $response_data);
 
-            // Log the message response
             error_log("Message Response: " . json_encode($message_response));
 
             if (isset($message_response['code']) && $message_response['code'] === 200) {
@@ -74,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script>
         function showTicket(ticketId) {
-            // Hide all ticket details
             const ticketDetails = document.getElementsByClassName('ticket-details');
             for (let i = 0; i < ticketDetails.length; i++) {
                 ticketDetails[i].style.display = 'none';
@@ -92,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.addEventListener("DOMContentLoaded", function() {
             const currentTicketId = <?php echo json_encode($current_ticket_id); ?>;
             if (currentTicketId) {
-                showTicket(currentTicketId); // Open the specified ticket on page load
+                showTicket(currentTicketId); 
             } else {
                 const firstTicket = document.querySelector('.ticket-details');
                 if (firstTicket) {
@@ -120,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <div class="row">
-            <!-- Sidebar: Ticket List -->
             <div class="col-md-3">
                 <h4>Tickets</h4>
                 <div class="list-group">
@@ -137,7 +131,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <!-- Main View: Ticket Details -->
             <div class="col-md-6">
                 <?php if ($tickets && isset($tickets['data']) && count($tickets['data']) > 0): ?>
                     <?php foreach ($tickets['data'] as $ticket): ?>
@@ -146,7 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <p><strong>Submitted by:</strong> <?php echo htmlspecialchars($ticket['user_name']); ?></p>
                             <p><strong>Message:</strong> <?php echo htmlspecialchars($ticket['message']); ?></p>
 
-                            <!-- Display list of message objects -->
                             <?php if (!empty($ticket['messages'])): ?>
                                 <div class="responses mt-3">
                                     <h6>Messages:</h6>
@@ -158,7 +150,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             <?php endif; ?>
 
-                            <!-- Form to post a response message -->
                             <form action="admin.php" method="post" class="mt-3">
                                 <input type="hidden" name="ticket_id" id="ticket-id-response">
                                 <div class="mb-3">
@@ -172,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
             </div>
 
-            <!-- Sidebar: Update Ticket Section -->
+            <!-- Update ticket section on the right -->
             <div class="col-md-3">
                 <div class="update-ticket-section mt-3">
                     <h5>Update Ticket</h5>
