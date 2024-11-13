@@ -7,59 +7,39 @@ start_session();
 $error_message = '';
 $success_message = '';
 
-// Fetch all ticket requests
-$tickets = api_request_with_token("api/admin/requests", "GET");
+// Determine whether to fetch all tickets (admin) or only the user's tickets (non-admin)
+$user_id = $_SESSION['user_id'] ?? null;
+$is_admin = $_SESSION['is_admin'] ?? false; // Assuming this session variable indicates admin status
+
+// Use the admin API endpoint to fetch tickets, but adjust parameters based on user role
+$api_endpoint = $is_admin ? "api/admin/requests" : "api/admin/requests?user_id=$user_id";
+$tickets = api_request_with_token($api_endpoint, "GET");
+
+// Check if tickets were retrieved
+if (!$tickets || !isset($tickets['data']) || count($tickets['data']) === 0) {
+    $error_message = "No tickets found or failed to fetch tickets.";
+}
 
 // Get the current ticket ID from the URL parameter (if available)
 $current_ticket_id = $_GET['ticket_id'] ?? null;
 
-// Handle form submission for updating tickets
+// Handle form submission for posting a response
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $ticket_id = $_POST['ticket_id'] ?? null; // Ensure ticket_id is set
+    $ticket_id = $_POST['ticket_id'];
+    $response_message = $_POST['response_message'] ?? null;
 
-    if ($ticket_id) { // Only proceed if ticket_id is not empty
-        $status = $_POST['status'] ?? null;
-        $assigned_to = $_POST['assigned_to'] ?? null;
-        $response_message = $_POST['response_message'] ?? null;
-
-        // Prepare data for updating the ticket
-        $update_data = [];
-        if ($status) $update_data['status'] = $status;
-        if ($assigned_to) $update_data['assigned_to'] = $assigned_to;
-
-        // Update ticket details
-        if (!empty($update_data)) {
-            $update_response = api_request_with_token("api/admin/requests/$ticket_id", "PATCH", $update_data);
-
-            // Log the response for debugging
-            error_log("Update response: " . json_encode($update_response));
-
-            if (isset($update_response['code']) && $update_response['code'] === 200) {
-                $success_message = "Ticket updated successfully!";
-            } else {
-                $error_message = "Failed to update ticket. API Response: " . json_encode($update_response);
-            }
+    // Post a new response message to the ticket
+    if ($response_message) {
+        $response_data = ['message' => $response_message];
+        $message_response = api_request_with_token("api/admin/requests/$ticket_id/messages", "POST", $response_data);
+        if (isset($message_response['code']) && $message_response['code'] === 200) {
+            $success_message = "Response posted successfully!";
+            // Redirect to refresh the page and display the new response
+            header("Location: user_tickets.php?ticket_id=$ticket_id");
+            exit();
+        } else {
+            $error_message = "Failed to post response.";
         }
-
-        // Post a new response message to the ticket
-        if ($response_message) {
-            $response_data = ['message' => $response_message];
-            $message_response = api_request_with_token("api/admin/requests/$ticket_id/messages", "POST", $response_data);
-
-            // Log the message response
-            error_log("Message Response: " . json_encode($message_response));
-
-            if (isset($message_response['code']) && $message_response['code'] === 200) {
-                $success_message = "Response posted successfully!";
-                // Redirect to refresh the page and keep the current ticket open
-                header("Location: admin.php?ticket_id=$ticket_id");
-                exit();
-            } else {
-                $error_message = "Failed to post response. API Response: " . json_encode($message_response);
-            }
-        }
-    } else {
-        $error_message = "Ticket ID is missing.";
     }
 }
 ?>
@@ -70,25 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php echo($NAV_HEADERS) ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Ticket Management</title>
+    <title>User Dashboard - Ticket Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script>
         function showTicket(ticketId) {
-            // Hide all ticket details
             const ticketDetails = document.getElementsByClassName('ticket-details');
             for (let i = 0; i < ticketDetails.length; i++) {
                 ticketDetails[i].style.display = 'none';
             }
-            
-            // Show selected ticket details
             document.getElementById('ticket-' + ticketId).style.display = 'block';
-
-            // Set the ticket ID in the hidden input for update and response forms
-            document.getElementById('ticket-id-update').value = ticketId;
-            document.getElementById('ticket-id-response').value = ticketId;
         }
         
-        // Open the ticket passed in the URL parameter on page load
+        // Function to open the ticket passed in the URL parameter
         document.addEventListener("DOMContentLoaded", function() {
             const currentTicketId = <?php echo json_encode($current_ticket_id); ?>;
             if (currentTicketId) {
@@ -107,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Admin Dashboard - Ticket Management</h1>
+            <h1><?php echo $is_admin ? 'Admin' : 'User'; ?> Dashboard - My Tickets</h1>
             <button class="btn btn-secondary" onclick="window.location.href='dashboard.php'">Go to Main Screen</button>
         </div>
 
@@ -122,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="row">
             <!-- Sidebar: Ticket List -->
             <div class="col-md-3">
-                <h4>Tickets</h4>
+                <h4>Your Tickets</h4>
                 <div class="list-group">
                     <?php if ($tickets && isset($tickets['data']) && count($tickets['data']) > 0): ?>
                         <?php foreach ($tickets['data'] as $ticket): ?>
@@ -138,12 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <!-- Main View: Ticket Details -->
-            <div class="col-md-6">
+            <div class="col-md-9">
                 <?php if ($tickets && isset($tickets['data']) && count($tickets['data']) > 0): ?>
                     <?php foreach ($tickets['data'] as $ticket): ?>
                         <div id="ticket-<?php echo $ticket['id']; ?>" class="ticket-details" style="display: none;">
                             <h4><?php echo htmlspecialchars($ticket['subject']); ?></h4>
-                            <p><strong>Submitted by:</strong> <?php echo htmlspecialchars($ticket['user_name']); ?></p>
+                            <p><strong>Submitted on:</strong> <?php echo htmlspecialchars($ticket['created_at']); ?></p>
+                            <p><strong>Status:</strong> <?php echo htmlspecialchars($ticket['status']); ?></p>
                             <p><strong>Message:</strong> <?php echo htmlspecialchars($ticket['message']); ?></p>
 
                             <!-- Display list of message objects -->
@@ -159,8 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endif; ?>
 
                             <!-- Form to post a response message -->
-                            <form action="admin.php" method="post" class="mt-3">
-                                <input type="hidden" name="ticket_id" id="ticket-id-response">
+                            <form action="user_tickets.php" method="post" class="mt-3">
+                                <input type="hidden" name="ticket_id" value="<?php echo $ticket['id']; ?>">
                                 <div class="mb-3">
                                     <label for="response_message-<?php echo $ticket['id']; ?>" class="form-label">Post a Response:</label>
                                     <textarea name="response_message" id="response_message-<?php echo $ticket['id']; ?>" class="form-control" rows="3"></textarea>
@@ -170,32 +144,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
-            </div>
-
-            <!-- Sidebar: Update Ticket Section -->
-            <div class="col-md-3">
-                <div class="update-ticket-section mt-3">
-                    <h5>Update Ticket</h5>
-                    <form action="admin.php" method="post">
-                        <input type="hidden" name="ticket_id" id="ticket-id-update">
-
-                        <div class="mb-3">
-                            <label for="status-update" class="form-label">Update Status:</label>
-                            <select name="status" id="status-update" class="form-select">
-                                <option value="open">Open</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="closed">Closed</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="assigned-to-update" class="form-label">Assign to:</label>
-                            <input type="text" name="assigned_to" id="assigned-to-update" class="form-control" placeholder="Enter assignee name">
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Update Ticket</button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>

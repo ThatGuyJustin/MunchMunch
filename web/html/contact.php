@@ -13,40 +13,48 @@ if (!is_user_logged_in()) {
 }
 
 // Get the logged-in user's details from the session
-$user_name = isset($_SESSION['username']) ? $_SESSION['username'] : '';
-$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : ''; // assuming user_id is in session
+$user_name = $_SESSION['username'] ?? '';
+$user_id = $_SESSION['user_id'] ?? '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize user inputs
     $subject = trim($_POST['subject']);
     $message = trim($_POST['message']);
-    $category_request = trim($_POST['category_request']);
 
     if (empty($subject) || empty($message)) {
         $error_message = "Subject and Message are required.";
     } else {
-        // Prepare data for API request
+        // Prepare data with only required fields
         $data = [
             'subject' => $subject,
-            'message' => $message,
-            'category_request' => $category_request,
-            'user_id' => $user_id
+            'message' => $message
         ];
         
         // Send POST request to API to create a ticket
         $response = api_request_with_token('api/admin/requests', 'POST', $data);
 
-        if ($response && isset($response['success']) && $response['success'] === true) {
+        // Check if API response is successful without showing debug details to the user
+        if ($response && isset($response['code']) && $response['code'] === 200 && isset($response['msg']) && strpos($response['msg'], 'Created') !== false) {
             $success_message = "Your request has been submitted successfully!";
         } else {
-            $error_message = "Failed to submit your request. Please try again.";
+            // Log the response for debugging, but don't show detailed information on the frontend
+            error_log("API Error: " . json_encode($response));
+            $error_message = "Failed to submit your request. Please try again later.";
         }
     }
 }
 
 // Fetch existing tickets for the user
 $requests = api_request_with_token("api/admin/requests?user_id=" . $user_id, "GET");
+
+// Log errors for requests fetching, without displaying on the frontend
+if ($requests === null) {
+    error_log("API returned null response for GET /api/admin/requests?user_id=" . $user_id);
+} else {
+    error_log("Fetched requests: " . json_encode($requests));
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -82,10 +90,6 @@ $requests = api_request_with_token("api/admin/requests?user_id=" . $user_id, "GE
                 <label for="message" class="form-label">Message:</label>
                 <textarea name="message" class="form-control" id="message" rows="5" required></textarea>
             </div>
-            <!-- <div class="mb-3">
-                <label for="category_request" class="form-label">Request New Category (Optional):</label>
-                <input type="text" name="category_request" class="form-control" id="category_request">
-            </div> -->
             <button type="submit" class="btn btn-primary">Submit Ticket</button>
         </form>
         <div class="mt-4">

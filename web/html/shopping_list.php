@@ -14,20 +14,22 @@ $shopping_list_recipes = [];
 $ingredient_list = [];
 
 // Fetch the shopping list for the current user
-$api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/shopping-list";
+$user_id = $_SESSION['user_id'];
+$api_path_shopping_list = "api/users/$user_id/shopping-list";
 $shopping_list_response = api_request_with_token($api_path_shopping_list);
 
-if ($shopping_list_response['code'] === 200) {
+// Check if the response was successful
+if (isset($shopping_list_response['code']) && $shopping_list_response['code'] === 200 && isset($shopping_list_response['data'])) {
     $shopping_list_data = $shopping_list_response['data'];
-    $shopping_list_recipeIDs = $shopping_list_data['recipes']; // List of recipe IDs
-    $ingredient_list = $shopping_list_data['ingredients']; 
+    
+    // Ensure both recipes and ingredients are set as arrays
+    $shopping_list_recipes = isset($shopping_list_data['recipes']) ? $shopping_list_data['recipes'] : [];
+    $ingredient_list = isset($shopping_list_data['ingredients']) ? $shopping_list_data['ingredients'] : [];
 } else {
-    echo "Failed to load shopping list.";
+    echo "Failed to load shopping list. Error: ";
+    var_dump($shopping_list_response); // Debug output
     exit();
 }
-$api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/recipes";
-$shopping_list_response = api_request_with_token($api_path_shopping_list);
-
 ?>
 
 <!DOCTYPE html>
@@ -36,7 +38,7 @@ $shopping_list_response = api_request_with_token($api_path_shopping_list);
     <?php echo($NAV_HEADERS); ?>
     <meta charset="UTF-8">
     <title>Shopping List</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
         .shopping-list-box, .recipe-list-box {
             border: 1px solid #ddd;
@@ -54,26 +56,49 @@ $shopping_list_response = api_request_with_token($api_path_shopping_list);
 <body>
 <?php echo($NAV_ICONS); ?>
 
-
 <div class="container mt-5">
     <h2 class="centered-title">Shopping List</h2>
     <div class="row">
-        <!-- Ingredient List -->
-        <div class="col-md-8 shopping-list-box">
+        <!-- Ingredient List on the left -->
+        <div class="col-md-6 shopping-list-box">
             <h4>Ingredients</h4>
             <ul class="list-group">
-                <?php foreach ($ingredient_list as $ingredient => $quantity): ?>
-                    <li class="list-group-item">
-                        <?php echo htmlspecialchars($ingredient) . ": " . htmlspecialchars($quantity); ?>
-                    </li>
-                <?php endforeach; ?>
+                <?php if (!empty($ingredient_list)): ?>
+                    <?php foreach ($ingredient_list as $ingredient => $quantity): ?>
+                        <li class="list-group-item">
+                            <?php echo htmlspecialchars($ingredient) . ": " . htmlspecialchars($quantity); ?>
+                        </li>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <li class="list-group-item">No ingredients in the shopping list.</li>
+                <?php endif; ?>
             </ul>
         </div>
-        
-       
+
+        <!-- Recipe List on the right -->
+        <div class="col-md-6 recipe-list-box">
+            <h4>Included Recipes</h4>
+            <ul class="list-group">
+                <?php if (!empty($shopping_list_recipes)): ?>
+                    <?php foreach ($shopping_list_recipes as $recipe_id): ?>
+                        <!-- Fetch recipe details for each recipe in the list -->
+                        <?php 
+                        $recipe_data = api_request_with_token("api/recipes/$recipe_id");
+                        if (isset($recipe_data['data'])): 
+                        ?>
+                            <li class="list-group-item">
+                                <?php echo htmlspecialchars($recipe_data['data']['name']); ?>
+                            </li>
+                        <?php else: ?>
+                            <li class="list-group-item">Recipe not found.</li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <li class="list-group-item">No recipes in the shopping list.</li>
+                <?php endif; ?>
+            </ul>
+        </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
