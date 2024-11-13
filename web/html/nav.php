@@ -7,7 +7,8 @@ $NAV_HEADERS = <<<EOD
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 EOD;
 
-$NAV_ICONS = <<<EOD
+// Start building $NAV_ICONS as a string
+$NAV_ICONS = '
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="index.php">FoodTinder</a>
@@ -30,7 +31,18 @@ $NAV_ICONS = <<<EOD
                 <li><a class="dropdown-item" href="settings.php"><i class="fa-solid fa-user-gear"></i> Settings</a></li>
                 <li><a class="dropdown-item" href="recipeform.php"><i class="fa-regular fa-clipboard"></i> Create Recipe</a></li> 
                 <li><a class="dropdown-item" href="contact.php"><i class="fa-solid fa-ticket"></i> Contact Admin</a></li>
-                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="support.php"><i class="fa-solid fa-ticket"></i> Support </a></li>
+                <li><hr class="dropdown-divider"></li>';
+
+// Check if the user is an admin and add the admin link if true
+if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
+    $NAV_ICONS .= '
+                <li><a class="dropdown-item" href="admin.php"><i class="fa-solid fa-shield-alt"></i> Admin Dashboard</a></li>
+                <li><hr class="dropdown-divider"></li>';
+}
+
+// Finish the rest of the menu items
+$NAV_ICONS .= '
                 <li><a class="dropdown-item text-danger" href="logout.php"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a></li>
             </ul>
         </div>
@@ -39,6 +51,6 @@ $NAV_ICONS = <<<EOD
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="js/bootstrap.bundle.min.js"></script>
-EOD;
+';
 
 ?>

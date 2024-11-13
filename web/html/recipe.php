@@ -94,42 +94,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error_message = isset($response['msg']) ? $response['msg'] : "Failed to submit the review.";
     }
 }
-// Handle adding to shopping list
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'])) {
-    // Step 1: Retrieve the current shopping list
-    $current_list_response = api_request_with_token("api/users/$user_id/shopping-list", "GET");
+    $add_to_shopping_data = [
+        'recipes' => [$recipe_id],
+        'ingredients' => $recipe["ingredients"]
+    ];
 
-    if ($current_list_response && $current_list_response['code'] === 200) {
-        // Ensure the response data exists
-        $current_list = $current_list_response['data'] ?? [];
-        
-        // Initialize arrays if they do not exist in the current list
-        $current_recipes = $current_list['recipes'] ?? [];
-        $current_ingredients = $current_list['ingredients'] ?? [];
+    $response = api_request_with_token("api/users/$user_id/shopping-list", "POST", $add_to_shopping_data);
 
-        // Step 2: Add the new recipe and ingredients to the current list
-        $updated_recipes = array_merge($current_recipes, [$recipe_id]);
-        $updated_ingredients = array_merge($current_ingredients, $recipe["ingredients"]);
-
-        $add_to_shopping_data = [
-            'recipes' => $updated_recipes,
-            'ingredients' => $updated_ingredients
-        ];
-
-        // Step 3: Update the shopping list with the new data
-        $response = api_request_with_token("api/users/$user_id/shopping-list", "PATCH", $add_to_shopping_data);
-
-        if ($response && $response['code'] === 200) {
-            $success_message = "Recipe added to shopping list!";
-        } else {
-            $error_message = isset($response['msg']) ? $response['msg'] : "Failed to add to shopping list.";
-        }
+    if ($response && $response['code'] === 200) {
+        $success_message = "Recipe added to shopping list!";
     } else {
-        $error_message = "Could not retrieve the current shopping list.";
+        $error_message = isset($response['msg']) ? $response['msg'] : "Failed to add to shopping list.";
     }
 }
-
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
