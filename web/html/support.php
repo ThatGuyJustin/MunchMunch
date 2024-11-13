@@ -7,11 +7,11 @@ start_session();
 $error_message = '';
 $success_message = '';
 
-// Determine whether to fetch all tickets (admin) or only the user's tickets (non-admin)
+// Check if admin or user
 $user_id = $_SESSION['user_id'] ?? null;
-$is_admin = $_SESSION['is_admin'] ?? false; // Assuming this session variable indicates admin status
+$is_admin = $_SESSION['is_admin'] ?? false; 
 
-// Use the admin API endpoint to fetch tickets, but adjust parameters based on user role
+// based on role adjust
 $api_endpoint = $is_admin ? "api/admin/requests" : "api/admin/requests?user_id=$user_id";
 $tickets = api_request_with_token($api_endpoint, "GET");
 
@@ -20,10 +20,9 @@ if (!$tickets || !isset($tickets['data']) || count($tickets['data']) === 0) {
     $error_message = "No tickets found or failed to fetch tickets.";
 }
 
-// Get the current ticket ID from the URL parameter (if available)
+// Get the current ticket ID 
 $current_ticket_id = $_GET['ticket_id'] ?? null;
 
-// Handle form submission for posting a response
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ticket_id = $_POST['ticket_id'];
     $response_message = $_POST['response_message'] ?? null;
@@ -61,11 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('ticket-' + ticketId).style.display = 'block';
         }
         
-        // Function to open the ticket passed in the URL parameter
+        // Function to open the ticket passed 
         document.addEventListener("DOMContentLoaded", function() {
             const currentTicketId = <?php echo json_encode($current_ticket_id); ?>;
             if (currentTicketId) {
-                showTicket(currentTicketId); // Open the specified ticket on page load
+                showTicket(currentTicketId); 
             } else {
                 const firstTicket = document.querySelector('.ticket-details');
                 if (firstTicket) {
