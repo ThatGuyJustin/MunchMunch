@@ -2,6 +2,7 @@ import datetime
 import json
 
 from flask import Blueprint, request
+from mongoengine import DoesNotExist
 
 from models.history import History
 from models.post import Post
@@ -220,7 +221,11 @@ def post_shopping_list(user, uid):
 @users.get("/<uid>/shopping-list")
 @authed
 def get_shopping_list(user, uid):
-    slist = ShoppingList.objects.get(user=user.id)
+    try:
+        slist = ShoppingList.objects.get(user=user.id)
+    except DoesNotExist:
+        return {"code": 404, "data": None, "msg": "Shopping List Not Found"}, 404
+
     raw_recipes = {}
     raw_ids = []
     for recipe in slist.recipes:
