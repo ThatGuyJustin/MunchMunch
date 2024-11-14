@@ -52,18 +52,17 @@ foreach ($all_tags as &$tag) {
     }
 }
 
-// Fetch the reviews for the recipe from the API if recipe_id does not start with "sp_"
-$reviews = [];
-if (strpos($recipe_id, 'sp_') !== 0) {
-    $reviews_response = api_request_with_token("api/recipes/$recipe_id/reviews");
-    $reviews = isset($reviews_response['data']) ? $reviews_response['data'] : [];
-}
-
+// Set up the image URL and author name based on recipe_id
 $recipe_image_url = "image.png"; 
-$media_hash = null;
-if(count($recipe["media"]["main"]) > 0){
+if (strpos($recipe_id, 'sp_') === 0 && isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
+    // hardcode the author
+    $recipe_image_url = $recipe["media"]["main"][0];
+    $author_name = "Spoonacular";
+} else {
+    // For other recipes, get image use the actual author's name
     $media_hash = $recipe["media"]["main"][0];
     $recipe_image_url = "api/media/recipe/$recipe_id/main/$media_hash";
+    $author_name = $who_did_it["data"]["name"];
 }
 
 // Format the ingredients as a list
@@ -150,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
         <div class="row">
             <div class="col-10">
                 <h1 class="display-4"><?php echo htmlspecialchars($recipe["title"]); ?></h1><p><?php echo implode(", ", $needed_tags); ?></p>
-                <p class="lead">By: <?php echo htmlspecialchars($who_did_it["data"]["name"]); ?></p>
+                <p class="lead">By: <?php echo htmlspecialchars($author_name); ?></p>
             </div>
             <div class="col-1">
                 <img class="image-fluid" width=200 height=200 src="<?php echo htmlspecialchars($recipe_image_url); ?>" alt="<?php echo htmlspecialchars($recipe["title"]); ?>">
