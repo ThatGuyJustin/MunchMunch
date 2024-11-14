@@ -48,32 +48,32 @@ foreach ($shopping_list_data['recipes'] as $recipe_id) {
     }
 }
 
-// Fetch the shopping list for the current user
-// $api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/shopping-list";
-// $shopping_list_response = api_request_with_token($api_path_shopping_list);
+/* // Fetch the shopping list for the current user
+$api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/shopping-list";
+$shopping_list_response = api_request_with_token($api_path_shopping_list);
 
-// if ($shopping_list_response['code'] === 200) {
-//     $shopping_list_data = $shopping_list_response['data'];
+if ($shopping_list_response['code'] === 200) {
+    $shopping_list_data = $shopping_list_response['data'];
     
-//     // Aggregate ingredient quantities
-//     foreach ($shopping_list_data['ingredients'] as $ingredient => $quantity) {
-//         if (isset($ingredient_list[$ingredient])) {
-//             $ingredient_list[$ingredient] += $quantity; // Sum quantities of the same ingredient
-//         } else {
-//             $ingredient_list[$ingredient] = $quantity;
-//         }
-//     }
+    // Aggregate ingredient quantities
+    foreach ($shopping_list_data['ingredients'] as $ingredient => $quantity) {
+        if (isset($ingredient_list[$ingredient])) {
+            $ingredient_list[$ingredient] += $quantity; // Sum quantities of the same ingredient
+        } else {
+            $ingredient_list[$ingredient] = $quantity;
+        }
+    }
 
-//     // Extract recipes from raw_recipes using recipe IDs in shopping list
-//     foreach ($shopping_list_data['recipes'] as $recipe_id) {
-//         if (isset($shopping_list_data['raw_recipes'][$recipe_id])) {
-//             $shopping_list_recipes[] = $shopping_list_data['raw_recipes'][$recipe_id]; // Store recipe data
-//         }
-//     }
-// } else {
-//     echo "Failed to load shopping list.";
-//     exit();
-// }
+    // Extract recipes from raw_recipes using recipe IDs in shopping list
+    foreach ($shopping_list_data['recipes'] as $recipe_id) {
+        if (isset($shopping_list_data['raw_recipes'][$recipe_id])) {
+            $shopping_list_recipes[] = $shopping_list_data['raw_recipes'][$recipe_id]; // Store recipe data
+        }
+    }
+} else {
+    echo "Failed to load shopping list.";
+    exit();
+} */
 ?>
 
 <!DOCTYPE html>

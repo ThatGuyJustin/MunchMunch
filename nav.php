@@ -10,7 +10,7 @@ EOD;
 $NAV_ICONS = <<<EOD
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="index.php">FoodTinder</a>
+        <a class="navbar-brand" href="dashboard.php">FoodTinder</a>
         
         <!-- Combined Search Bar with Filter Dropdown -->
         <form class="d-flex me-auto" method="GET" action="search.php">
