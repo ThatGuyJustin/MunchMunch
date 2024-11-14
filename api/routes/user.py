@@ -8,6 +8,7 @@ from models.history import History
 from models.post import Post
 from models.shopping import ShoppingList
 from models.user import Users as User_model
+from util.api import make_spoonacular_api_call, spoonacular_api_to_internal
 from util.auth import authed, can_do_admin_requests
 
 users = Blueprint('users', __name__)
@@ -190,19 +191,24 @@ def get_history(user, uid):
     to_return = []
 
     for history_obj in query:
+
         base_json = json.loads(history_obj.to_json())
         base_json['recipe'] = base_json["recipe"]["$oid"]
         base_json['id'] = base_json["_id"]
         bformatted = history_obj.timestamp.strftime("%m.%d.%Y %H:%M")
         base_json['timestamp'] = bformatted
         del base_json['_id']
-        r = Post.objects(id=base_json['recipe']).get()
-        recipe_json = json.loads(r.to_json())
-        recipe_json['id'] = recipe_json["_id"]["$oid"]
-        formatted = r.created_at.strftime("%m.%d.%Y %H:%M")
-        recipe_json['created_at'] = formatted
-        del recipe_json['_id']
-        base_json['recipe'] = recipe_json
+        if base_json['recipe'].startswith('sp_'):
+            rcode, recipe = make_spoonacular_api_call(f"recipes/{base_json['recipe'][3:]}/information", "get")
+            base_json['recipe'] = spoonacular_api_to_internal(recipe)
+        else:
+            r = Post.objects(id=base_json['recipe']).get()
+            recipe_json = json.loads(r.to_json())
+            recipe_json['id'] = recipe_json["_id"]["$oid"]
+            formatted = r.created_at.strftime("%m.%d.%Y %H:%M")
+            recipe_json['created_at'] = formatted
+            del recipe_json['_id']
+            base_json['recipe'] = recipe_json
         to_return.append(base_json)
 
     return {"code": 200, "data": to_return, "msg": None}, 200

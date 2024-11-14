@@ -1,5 +1,6 @@
 import datetime
 
+from bson import ObjectId
 from mongoengine import Document, IntField, DictField, ObjectIdField, StringField, DateTimeField
 
 
@@ -9,7 +10,8 @@ class HistoryTypes:
 
 
 class History(Document):
-    user = IntField(primary_key=True)
-    recipe = ObjectIdField()
+    id = ObjectIdField(primary_key=True, default=ObjectId)
+    user = IntField(index=True)
+    recipe = StringField()
     type = StringField()
     timestamp = DateTimeField(default=datetime.datetime.now(datetime.UTC))
