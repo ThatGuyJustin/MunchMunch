@@ -10,7 +10,7 @@ EOD;
 $NAV_ICONS = <<<EOD
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="index.php">FoodTinder</a>
+        <a class="navbar-brand" href="dashboard.php">FoodTinder</a>
         
         <!-- Search Button -->
         <form class="d-flex me-auto">
@@ -26,6 +26,7 @@ $NAV_ICONS = <<<EOD
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="profile.php"><i class="fa-regular fa-user"></i> Profile</a></li>
                 <li><a class="dropdown-item" href="account.php"><i class="fa-regular fa-pen-to-square"></i> Account Editing</a></li>
+                <li><a class="dropdown-item" href="shopping_list.php"><i class="fa-solid fa-cart-shopping"></i></i>Shopping List</a></li>
                 <li><a class="dropdown-item" href="notifications.php"><i class="fa-regular fa-bell"></i> Notifications</a></li>
                 <li><a class="dropdown-item" href="settings.php"><i class="fa-solid fa-user-gear"></i> Settings</a></li>
                 <li><a class="dropdown-item" href="recipeform.php"><i class="fa-regular fa-clipboard"></i> Create Recipe</a></li> 

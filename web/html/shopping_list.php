@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Test data for displaying the shopping list without API calls
+/* // Test data for displaying the shopping list without API calls
 // Mock data for shopping list response structure
 $shopping_list_data = [
     "recipes" => [1, 2, 3], // List of recipe IDs
@@ -46,9 +46,9 @@ foreach ($shopping_list_data['recipes'] as $recipe_id) {
     if (isset($shopping_list_data['raw_recipes'][$recipe_id])) {
         $shopping_list_recipes[] = $shopping_list_data['raw_recipes'][$recipe_id]; // Store recipe data
     }
-}
+} */
 
-/* // Fetch the shopping list for the current user
+// Fetch the shopping list for the current user
 $api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/shopping-list";
 $shopping_list_response = api_request_with_token($api_path_shopping_list);
 
@@ -73,7 +73,7 @@ if ($shopping_list_response['code'] === 200) {
 } else {
     echo "Failed to load shopping list.";
     exit();
-} */
+} 
 ?>
 
 <!DOCTYPE html>
@@ -129,6 +129,5 @@ if ($shopping_list_response['code'] === 200) {
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
