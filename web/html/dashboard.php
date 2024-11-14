@@ -11,7 +11,7 @@ if (!is_user_logged_in()) {
 }
 
 // Fetch a random recipe from the API
-$recipe = api_request_with_token("api/recipes/random");
+$recipe = api_request_with_token("api/recipes/sp-random");
 if (!isset($recipe['data'])) {
     echo "Recipe not found.";
     exit();
@@ -32,14 +32,18 @@ foreach ($all_tags['data'] as &$tag) {
 }
 
 // Set up the image URL
-$recipe_image_url = "default_image.jpg"; // Default image if none found
-$media_hash = null;
-if (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
+$recipe_image_url = "default_image.jpg"; 
+
+// Check if recipe ID starts with sp_ and set image URL directly
+if (strpos($recipe["id"], 'sp_') === 0 && isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
+    $recipe_image_url = $recipe["media"]["main"][0];  
+} elseif (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
     $media_hash = $recipe["media"]["main"][0];
     $recipe_image_url = "api/media/recipe/" . $recipe["id"] . "/main/" . $media_hash;
 }
+?>
 
-?><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <?php echo($NAV_HEADERS) ?>
@@ -99,7 +103,12 @@ if (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
                         <?php echo htmlspecialchars($recipe["title"]); ?>
                     </a>
                 </h5>
-                <p class="card-text"><strong>By:</strong> <?php echo htmlspecialchars($who_did_it["data"]["name"]); ?></p>
+                <p class="card-text"><strong>By:</strong> 
+                    <?php 
+                    // Display Spoonacular 
+                    echo strpos($recipe["id"], 'sp_') === 0 ? "Spoonacular" : htmlspecialchars($who_did_it["data"]["name"]); 
+                    ?>
+                </p>
                 <p class="card-text"><strong>Tags:</strong> <?php echo implode(", ", $needed_tags); ?></p>
             </div>
         </div>
