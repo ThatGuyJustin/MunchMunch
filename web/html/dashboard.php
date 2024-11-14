@@ -11,7 +11,7 @@ if (!is_user_logged_in()) {
 }
 
 // Fetch a random recipe from the API
-$recipe = api_request_with_token("api/recipes/random");
+$recipe = api_request_with_token("api/recipes/sp-random");
 if (!isset($recipe['data'])) {
     echo "Recipe not found.";
     exit();
@@ -32,9 +32,12 @@ foreach ($all_tags['data'] as &$tag) {
 }
 
 // Set up the image URL
-$recipe_image_url = "default_image.jpg"; // Default image if none found
-$media_hash = null;
-if (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
+$recipe_image_url = "default_image.jpg"; 
+
+// Check if recipe ID starts with sp_ and set image URL directly
+if (strpos($recipe["id"], 'sp_') === 0 && isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
+    $recipe_image_url = $recipe["media"]["main"][0];  
+} elseif (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
     $media_hash = $recipe["media"]["main"][0];
     $recipe_image_url = "api/media/recipe/" . $recipe["id"] . "/main/" . $media_hash;
 }
@@ -50,17 +53,40 @@ if (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
     <script src="js/scripts.js"></script>
     <style>
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 50px auto;
+            position: relative;
+        }
+        .card {
+            position: relative;
         }
         .card-img-top {
-            height: 300px;
+            height: 400px;
             object-fit: cover;
         }
         .button-container {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            transform: translateY(-50%);
+        }
+        .button-left,
+        .button-right {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            cursor: pointer;
+        }
+        .button-left {
+            margin-left: -120px;
+        }
+        .button-right {
+            margin-right: -120px;
         }
     </style>
 </head>
@@ -72,18 +98,23 @@ if (isset($recipe["media"]["main"]) && count($recipe["media"]["main"]) > 0) {
         <div class="card">
             <img src="<?php echo htmlspecialchars($recipe_image_url); ?>" class="card-img-top" alt="Recipe Image">
             <div class="card-body text-center">
-            <h5 class="card-title">
-                 <a href="recipe.php?id=<?php echo htmlspecialchars($recipe["id"]); ?>">
-                 <?php echo htmlspecialchars($recipe["title"]); ?>
-                 </a>
-            </h5>
-                <p class="card-text"><strong>By:</strong> <?php echo htmlspecialchars($who_did_it["data"]["name"]); ?></p>
+                <h5 class="card-title">
+                    <a href="recipe.php?id=<?php echo htmlspecialchars($recipe["id"]); ?>">
+                        <?php echo htmlspecialchars($recipe["title"]); ?>
+                    </a>
+                </h5>
+                <p class="card-text"><strong>By:</strong> 
+                    <?php 
+                    // Display Spoonacular 
+                    echo strpos($recipe["id"], 'sp_') === 0 ? "Spoonacular" : htmlspecialchars($who_did_it["data"]["name"]); 
+                    ?>
+                </p>
                 <p class="card-text"><strong>Tags:</strong> <?php echo implode(", ", $needed_tags); ?></p>
             </div>
         </div>
         <div class="button-container">
-            <button onclick="fetchRandomRecipe('prev')" class="btn btn-primary">Previous</button>
-            <button onclick="fetchRandomRecipe('next')" class="btn btn-primary">Next</button>
+            <button onclick="fetchRandomRecipe('prev')" class="button-left">Previous</button>
+            <button onclick="fetchRandomRecipe('next')" class="button-right">Next</button>
         </div>
     </div>
 

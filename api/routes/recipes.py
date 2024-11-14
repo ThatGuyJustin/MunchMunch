@@ -1,6 +1,7 @@
 import json
 from dataclasses import asdict
 
+import requests
 from flask import Blueprint, request, redirect
 from mongoengine import DoesNotExist
 
