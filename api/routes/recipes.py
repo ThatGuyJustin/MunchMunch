@@ -224,10 +224,7 @@ def recommended_recipe(user):
 def spoonacular_recipe(user):
     rcode, data = make_spoonacular_api_call("recipes/random", "get")
     formatted = spoonacular_api_to_internal(data['recipes'][0])
-    return {
-        "og": data,
-        "formatted": formatted
-    }, 200
+    return {'code': 200, 'data': formatted, 'msg': "Random Recipe"}, 200
 
 
 @recipes.route("/testing", methods=["GET", "POST"])
