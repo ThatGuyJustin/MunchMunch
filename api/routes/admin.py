@@ -46,7 +46,7 @@ def make_request(user):
 def get_pending_requests(user):
     if not can_do_admin_requests(user):
         raw_tickets = list(Ticket.select().where(Ticket.user == user.id))
-        tickets = [ticket.to_dict() for ticket in raw_tickets]
+        tickets = [attach_user_objects(ticket) for ticket in raw_tickets]
         return {'code': 200, "data": tickets, "msg": "User's tickets"}, 200
 
     raw_tickets = list(Ticket.select())

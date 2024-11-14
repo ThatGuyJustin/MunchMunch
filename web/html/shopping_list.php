@@ -49,10 +49,12 @@ foreach ($shopping_list_data['recipes'] as $recipe_id) {
 } */
 
 // Fetch the shopping list for the current user
-$api_path_shopping_list = "api/users/" . $_SESSION["user_id"] . "/shopping-list";
+$user_id = $_SESSION['user_id'];
+$api_path_shopping_list = "api/users/$user_id/shopping-list";
 $shopping_list_response = api_request_with_token($api_path_shopping_list);
 
-if ($shopping_list_response['code'] === 200) {
+// Check if the response was successful
+if (isset($shopping_list_response['code']) && $shopping_list_response['code'] === 200 && isset($shopping_list_response['data'])) {
     $shopping_list_data = $shopping_list_response['data'];
     
     // Aggregate ingredient quantities
@@ -71,7 +73,8 @@ if ($shopping_list_response['code'] === 200) {
         }
     }
 } else {
-    echo "Failed to load shopping list.";
+    echo "Failed to load shopping list. Error: ";
+    var_dump($shopping_list_response); // Debug output
     exit();
 } 
 ?>
@@ -82,7 +85,7 @@ if ($shopping_list_response['code'] === 200) {
     <?php echo($NAV_HEADERS); ?>
     <meta charset="UTF-8">
     <title>Shopping List</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
         .shopping-list-box, .recipe-list-box {
             border: 1px solid #ddd;
@@ -107,11 +110,15 @@ if ($shopping_list_response['code'] === 200) {
         <div class="col-md-6 shopping-list-box">
             <h4>Ingredients to Buy</h4>
             <ul class="list-group">
-                <?php foreach ($ingredient_list as $ingredient => $quantity): ?>
-                    <li class="list-group-item">
-                        <?php echo htmlspecialchars($ingredient) . ": " . htmlspecialchars($quantity); ?>
-                    </li>
-                <?php endforeach; ?>
+                <?php if (!empty($ingredient_list)): ?>
+                    <?php foreach ($ingredient_list as $ingredient => $quantity): ?>
+                        <li class="list-group-item">
+                            <?php echo htmlspecialchars($ingredient) . ": " . htmlspecialchars($quantity); ?>
+                        </li>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <li class="list-group-item">No ingredients in the shopping list.</li>
+                <?php endif; ?>
             </ul>
         </div>
 
