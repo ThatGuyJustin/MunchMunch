@@ -49,7 +49,6 @@ def post_recipe(user):
 def get_recipe(post_id):
     if post_id.startswith('sp_'):
         rcode, recipe = make_spoonacular_api_call(f"recipes/{post_id[3:]}/information", "get")
-
         return {'code': 200, 'data': spoonacular_api_to_internal(recipe), 'msg': 'recipe found!'}, 200
 
     try:
@@ -216,7 +215,68 @@ def review_recipe(user, recipe_id):
 @recipes.route("/recommended")
 @authed
 def recommended_recipe(user):
-    pass
+    # Step 1: Grab the user's history (and the recipe objects for said history)
+    query = History.objects(user=user.id)
+    query = query.limit(50)
+
+    raw_recipes = []
+    sp_recipes = []
+    for history_obj in query:
+        if history_obj.recipe.startswith("sp_"):
+            sp_recipes.append(history_obj.recipe[3:])
+        else:
+            raw_recipes.append(json.loads(Post.objects.get(id=history_obj.recipe).to_json()))
+
+    if len(sp_recipes):
+        rcode, all_recipes = make_spoonacular_api_call(f"recipes/informationBulk", "get", params={"ids": ",".join(sp_recipes)})
+        for recipe in all_recipes:
+            raw_recipes.append(spoonacular_api_to_internal(recipe))
+
+    # Step 2: Grab X random recipes (10)
+    rcode, random = make_spoonacular_api_call(f"recipes/random", "get", params={"number": 10})
+
+    random = [spoonacular_api_to_internal(rrecipe) for rrecipe in random['recipes']]
+
+    ingredients_list = []
+    recipe_names = []
+
+    for rr in raw_recipes:
+        recipe_names += rr['title'].split(" ")
+        ingredients_list += list(rr['ingredients'].keys())
+
+    # print(ingredients_list)
+
+    def rate_recipe(unrated_recipe):
+        name_weight = 0.2
+        ingredient_weight = 0.5
+
+        ingredients = list(unrated_recipe['ingredients'].keys())
+
+        # Cross-reference the ingredients in the random recipe to the massive list of ingredients in our history.
+        common_ingredients = set(ingredients).intersection(ingredients_list)
+
+        # Do some funky math to calculate how many points all the ingredients got us.
+        ingredient_score = ingredient_weight * len(common_ingredients) / len(unrated_recipe['ingredients'])
+
+        # Give a score based on keyword similarity
+        name_score = name_weight * any(keyword in unrated_recipe['title'].lower() for keyword in recipe_names)
+
+        # TOTAL THEM SCORES UP
+        total_score = ingredient_score + name_score
+
+        # Add a small boost if the recipe is new to the user
+        # if unrated_recipe['id'] not in HISTORY!!!!!!!!!!!!!!!!!:
+        #     total_score += 0.1
+        return total_score
+
+    rated_recipes = [(rrecipe, rate_recipe(rrecipe)) for rrecipe in random]
+
+    ranked = sorted(rated_recipes, key=lambda x: x[1], reverse=True)
+
+    for ranked_recipe in ranked:
+        print(f"{ranked_recipe[0]["title"]}: {ranked_recipe[1]}")
+
+    return {'code': 200, 'data': ranked[0][0], 'msg': "Random Recipe"}, 200
 
 
 @recipes.route("sp-random")
