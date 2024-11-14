@@ -1,11 +1,14 @@
 import json
 from dataclasses import asdict
 
+import requests
 from flask import Blueprint, request, redirect
 from mongoengine import DoesNotExist
 
+from models.history import History
 from models.post import Post, Review
 from models.user import Users
+from util.api import make_spoonacular_api_call, spoonacular_api_to_internal
 from util.auth import authed, can_do_admin_requests
 
 recipes = Blueprint('recipes', __name__)
@@ -44,6 +47,11 @@ def post_recipe(user):
 
 @recipes.get('/<post_id>')
 def get_recipe(post_id):
+    if post_id.startswith('sp_'):
+        rcode, recipe = make_spoonacular_api_call(f"recipes/{post_id[3:]}/information", "get")
+
+        return {'code': 200, 'data': spoonacular_api_to_internal(recipe), 'msg': 'recipe found!'}, 200
+
     try:
         recipe = Post.objects.get(id=post_id)
     except DoesNotExist:
@@ -203,6 +211,23 @@ def review_recipe(user, recipe_id):
             'msg': "Review Not Added",
             'data': {}
         }, 400
+
+
+@recipes.route("/recommended")
+@authed
+def recommended_recipe(user):
+    pass
+
+
+@recipes.route("sp-random")
+@authed
+def spoonacular_recipe(user):
+    rcode, data = make_spoonacular_api_call("recipes/random", "get")
+    formatted = spoonacular_api_to_internal(data['recipes'][0])
+    return {
+        "og": data,
+        "formatted": formatted
+    }, 200
 
 
 @recipes.route("/testing", methods=["GET", "POST"])
