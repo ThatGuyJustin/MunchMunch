@@ -52,11 +52,11 @@ def spoonacular_api_to_internal(spoonacular_recipe):
     ingredients = {}
     steps = []
 
-    for ingredient in spoonacular_recipe["extendedIngredients"]:
+    for ingredient in spoonacular_recipe.get("extendedIngredients", []):
         ingredients[ingredient["name"]] = f"{ingredient["measures"]["us"]["amount"]} {ingredient["measures"]["us"].get("unitLong", "")}"
 
     base_recipe["ingredients"] = ingredients
-    for super_step in spoonacular_recipe["analyzedInstructions"]:
+    for super_step in spoonacular_recipe.get("analyzedInstructions", []):
         for actual_steps in super_step["steps"]:
             steps.append(actual_steps["step"])
     base_recipe["steps"] = steps
