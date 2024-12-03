@@ -231,7 +231,7 @@ def get_shopping_list(user, uid):
     try:
         slist = ShoppingList.objects.get(user=user.id)
     except DoesNotExist:
-        return {"code": 404, "data": None, "msg": "Shopping List Not Found"}, 404
+        slist = ShoppingList(recipes={}, ingredients={}, user=uid).save()
 
     raw_recipes = {}
     raw_ids = []
@@ -274,7 +274,10 @@ def post_meal_plan(user, uid):
 @users.get("/<uid>/meal-plan")
 @authed
 def get_meal_plan(user, uid):
-    slist = MealPlan.objects.get(user=user.id)
+    try:
+        slist = MealPlan.objects.get(user=user.id)
+    except DoesNotExist:
+        slist = ShoppingList(plan=[], user=uid).save()
 
     return {"code": 200, "data":  json.loads(slist.to_json()), "msg": None}, 200
 
