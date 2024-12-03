@@ -5,6 +5,7 @@ from flask import Blueprint, request
 from mongoengine import DoesNotExist
 
 from models.history import History
+from models.mealplan import MealPlan
 from models.post import Post
 from models.shopping import ShoppingList
 from models.user import Users as User_model
@@ -230,7 +231,7 @@ def get_shopping_list(user, uid):
     try:
         slist = ShoppingList.objects.get(user=user.id)
     except DoesNotExist:
-        return {"code": 404, "data": None, "msg": "Shopping List Not Found"}, 404
+        slist = ShoppingList(recipes={}, ingredients={}, user=uid).save()
 
     raw_recipes = {}
     raw_ids = []
@@ -254,6 +255,38 @@ def get_shopping_list(user, uid):
 def patch_shopping_list(user, uid):
     rjson = request.get_json()
     slist = ShoppingList.objects.get(user=user.id)
+
+    updated = slist.update(**rjson)
+    slist.reload()
+
+    return {"code": 200, "data": json.loads(slist.to_json()), "msg": None}, 200
+
+@users.post("/<uid>/meal-plan")
+@authed
+def post_meal_plan(user, uid):
+    rjson = request.get_json()
+
+    new_list = MealPlan(**rjson, user=uid).save()
+
+    return {"code": 200, "data":  json.loads(new_list.to_json()), "msg": None}, 200
+
+
+@users.get("/<uid>/meal-plan")
+@authed
+def get_meal_plan(user, uid):
+    try:
+        slist = MealPlan.objects.get(user=user.id)
+    except DoesNotExist:
+        slist = ShoppingList(plan=[], user=uid).save()
+
+    return {"code": 200, "data":  json.loads(slist.to_json()), "msg": None}, 200
+
+
+@users.patch("/<uid>/meal-plan")
+@authed
+def patch_meal_plan(user, uid):
+    rjson = request.get_json()
+    slist = MealPlan.objects.get(user=user.id)
 
     updated = slist.update(**rjson)
     slist.reload()

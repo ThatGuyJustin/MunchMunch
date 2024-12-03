@@ -18,6 +18,7 @@ from routes.recipes import recipes
 from routes.tags import tags
 from util.auth import encrypt_password, authed
 from util.files import allowed_file, upload_object
+from util.search import search_recipes
 from util.validation import validate_username, validate_email
 
 app = Flask(__name__)
@@ -188,6 +189,30 @@ def login():
         "data": None,
         "error": "Unauthorized"
     }, 404
+
+
+@api.get("/search")
+@authed
+def search(user):
+    query_type = None
+
+    if "type" in request.args:
+        query_type = request.args.get("type")
+
+    match query_type:
+        case "admins":
+            all_admins = list(Users.select(Users).where(Users.account_flags.contains("ADMIN")))
+            return { "msg": f"Found {len(all_admins)} admins.", "code": 200, "data": [admin.to_dict() for admin in all_admins]}, 200
+        case "users":
+            filtered_users = list(Users.select(Users).where(
+                (Users.username.contains(request.args.get("query").lower())) | (fn.LOWER(Users.name).contains(request.args.get("query".lower())))
+            ))
+            return { "msg": f"Found {len(filtered_users)} users matching your query.", "code": 200, "data": [people.to_dict() for people in filtered_users]}, 200
+        case "recipe":
+            filtered_recipes = search_recipes(request.args)
+            return { "msg": f"Found {len(filtered_recipes)} recipes.", "code": 200, "data": filtered_recipes}, 200
+        case _:
+            return { "msg": "Query Type Not Found.", "code": 404, "data": None}, 216
 
 
 if __name__ == '__main__':
