@@ -162,38 +162,53 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
     </ul>
 </div>
 
-                            <!-- Recipes Favorited Tab -->
-                            <div class="tab-pane fade" id="favorited" role="tabpanel" aria-labelledby="favorited-tab">
-                                <ul class="list-group list-group-flush">
-                                    <?php if (!empty($favorited_recipes)): ?>
-                                        <?php foreach ($favorited_recipes as $recipe): ?>
-                                            <li class="list-group-item">
-                                                <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></strong> 
-                                                <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Favorited on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <li class="list-group-item">No recipes favorited yet.</li>
-                                    <?php endif; ?>
-                                </ul>
-                            </div>
-                            <!-- Viewed Recipes (History) --> 
-                            <?php if($_SESSION["user_id"] == $user["id"]): ?>
-                                <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab"> 
-                                    <ul class="list-group list-group-flush"> 
-                                        <?php if (!empty($viewed_recipes)): ?> 
-                                            <?php foreach ($viewed_recipes as $recipe): ?> 
-                                                <li class="list-group-item"> 
-                                                    <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['recipe']['id']); ?>"><?php echo htmlspecialchars($recipe['recipe']['title']); ?></a></strong>  
-                                                    <span class="text-muted">(Viewed on <?php echo htmlspecialchars($recipe['timestamp']); ?>)</span> 
-                                                </li> 
-                                            <?php endforeach; ?> 
-                                        <?php else: ?> 
-                                            <li class="list-group-item">No recently viewed recipes.</li> 
-                                        <?php endif; ?> 
-                                    </ul> 
-                                </div> 
-                            <?php endif; ?> 
+                         <!-- Recipes Favorited Tab -->
+<div class="tab-pane fade" id="favorited" role="tabpanel" aria-labelledby="favorited-tab">
+    <ul class="list-group list-group-flush">
+        <?php if (!empty($favorited_recipes)): ?>
+            <?php foreach ($favorited_recipes as $recipe): ?>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></strong> 
+                        <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Favorited on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
+                    </div>
+                    <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe['id']); ?>" method="post">
+                        <button class="btn btn-outline-primary btn-sm" type="submit" name="add_to_shopping_list" data-bs-toggle="tooltip" title="Add to your shopping list">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </form>
+                </li>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <li class="list-group-item">No recipes favorited yet.</li>
+        <?php endif; ?>
+    </ul>
+</div>
+<!-- Viewed Recipes (History) -->
+<?php if ($_SESSION["user_id"] == $user["id"]): ?>
+    <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+        <ul class="list-group list-group-flush">
+            <?php if (!empty($viewed_recipes)): ?>
+                <?php foreach ($viewed_recipes as $recipe): ?>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['recipe']['id']); ?>"><?php echo htmlspecialchars($recipe['recipe']['title']); ?></a></strong>
+                            <span class="text-muted">(Viewed on <?php echo htmlspecialchars($recipe['timestamp']); ?>)</span>
+                        </div>
+                        <!-- Add to Shopping Cart Button -->
+                        <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe['recipe']['id']); ?>" method="post">
+                            <button class="btn btn-outline-primary btn-sm" type="submit" name="add_to_shopping_list" data-bs-toggle="tooltip" title="Add to your shopping list">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </form>
+                    </li>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <li class="list-group-item">No recently viewed recipes.</li>
+            <?php endif; ?>
+        </ul>
+    </div>
+<?php endif; ?>
                         </div> 
                         </div>
                     </div>
