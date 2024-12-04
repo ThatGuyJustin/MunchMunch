@@ -231,7 +231,7 @@ def get_shopping_list(user, uid):
     try:
         slist = ShoppingList.objects.get(user=user.id)
     except DoesNotExist:
-        slist = ShoppingList(recipes={}, ingredients={}, user=uid).save()
+        slist = ShoppingList(recipes=[], ingredients={}, user=uid).save()
 
     raw_recipes = {}
     raw_ids = []
