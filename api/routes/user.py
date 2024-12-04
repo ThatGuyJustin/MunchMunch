@@ -222,7 +222,7 @@ def post_shopping_list(user, uid):
 
     new_list = ShoppingList(**rjson, user=uid).save()
 
-    return {"code": 200, "data":  json.loads(new_list.to_json()), "msg": None}, 200
+    return {"code": 200, "data": json.loads(new_list.to_json()), "msg": None}, 200
 
 
 @users.get("/<uid>/shopping-list")
@@ -235,19 +235,29 @@ def get_shopping_list(user, uid):
 
     raw_recipes = {}
     raw_ids = []
+    sp_recipes = []
     for recipe in slist.recipes:
-        rr = Post.objects(id=recipe).get()
-        raw_recipe = json.loads(rr.to_json())
-        raw_recipe['id'] = raw_recipe["_id"]["$oid"]
-        del raw_recipe['_id']
-        raw_recipes[str(recipe)] = raw_recipe
-        raw_ids.append(str(recipe))
+        if recipe.startswith("sp_"):
+            sp_recipes.append(recipe[3:])
+            raw_ids.append(recipe)
+        else:
+            rr = Post.objects(id=recipe).get()
+            raw_recipe = json.loads(rr.to_json())
+            raw_recipe['id'] = raw_recipe["_id"]["$oid"]
+            del raw_recipe['_id']
+            raw_recipes[recipe] = raw_recipe
+            raw_ids.append(recipe)
+
+    if len(sp_recipes):
+        rcode, all_recipes = make_spoonacular_api_call(f"recipes/informationBulk", "get", params={"ids": ",".join(sp_recipes)})
+        for recipe in all_recipes:
+            raw_recipes[f"sp_{recipe['id']}"] = spoonacular_api_to_internal(recipe)
 
     shopping_list = json.loads(slist.to_json())
     shopping_list['raw_recipes'] = raw_recipes
     shopping_list['recipes'] = raw_ids
 
-    return {"code": 200, "data":  shopping_list, "msg": None}, 200
+    return {"code": 200, "data": shopping_list, "msg": None}, 200
 
 
 @users.patch("/<uid>/shopping-list")
@@ -268,7 +278,7 @@ def post_meal_plan(user, uid):
 
     new_list = MealPlan(**rjson, user=uid).save()
 
-    return {"code": 200, "data":  json.loads(new_list.to_json()), "msg": None}, 200
+    return {"code": 200, "data": json.loads(new_list.to_json()), "msg": None}, 200
 
 
 @users.get("/<uid>/meal-plan")
@@ -279,7 +289,7 @@ def get_meal_plan(user, uid):
     except DoesNotExist:
         slist = ShoppingList(plan=[], user=uid).save()
 
-    return {"code": 200, "data":  json.loads(slist.to_json()), "msg": None}, 200
+    return {"code": 200, "data": json.loads(slist.to_json()), "msg": None}, 200
 
 
 @users.patch("/<uid>/meal-plan")
