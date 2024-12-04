@@ -9,9 +9,44 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Initialize variables for storing recipes and ingredients
-$shopping_list_recipes = [];
+/* // Test data for displaying the shopping list without API calls
+// Mock data for shopping list response structure
+$shopping_list_data = [
+    "recipes" => [1, 2, 3], // List of recipe IDs
+    "ingredients" => [
+        "Spaghetti" => 200,
+        "Ground Beef" => 500,
+        "Tomato Sauce" => 1,
+        "Lettuce" => 1,
+        "Chicken Breast" => 300,
+        "Taco Shells" => 6
+    ],
+    "raw_recipes" => [
+        1 => ["name" => "Spaghetti Bolognese"],
+        2 => ["name" => "Chicken Caesar Salad"],
+        3 => ["name" => "Beef Tacos"]
+    ]
+];
+
+// Initialize arrays to hold ingredients and recipes as in real code
 $ingredient_list = [];
+$shopping_list_recipes = [];
+
+// Aggregate ingredients as in the real API structure
+foreach ($shopping_list_data['ingredients'] as $ingredient => $quantity) {
+    if (isset($ingredient_list[$ingredient])) {
+        $ingredient_list[$ingredient] += $quantity; // Sum quantities of the same ingredient
+    } else {
+        $ingredient_list[$ingredient] = $quantity;
+    }
+}
+
+// Extract recipes from raw_recipes using recipe IDs
+foreach ($shopping_list_data['recipes'] as $recipe_id) {
+    if (isset($shopping_list_data['raw_recipes'][$recipe_id])) {
+        $shopping_list_recipes[] = $shopping_list_data['raw_recipes'][$recipe_id]; // Store recipe data
+    }
+} */
 
 // Fetch the shopping list for the current user
 $user_id = $_SESSION['user_id'];
@@ -22,14 +57,26 @@ $shopping_list_response = api_request_with_token($api_path_shopping_list);
 if (isset($shopping_list_response['code']) && $shopping_list_response['code'] === 200 && isset($shopping_list_response['data'])) {
     $shopping_list_data = $shopping_list_response['data'];
     
-    // Ensure both recipes and ingredients are set as arrays
-    $shopping_list_recipes = isset($shopping_list_data['recipes']) ? $shopping_list_data['recipes'] : [];
-    $ingredient_list = isset($shopping_list_data['ingredients']) ? $shopping_list_data['ingredients'] : [];
+    // Aggregate ingredient quantities
+    foreach ($shopping_list_data['ingredients'] as $ingredient => $quantity) {
+        if (isset($ingredient_list[$ingredient])) {
+            $ingredient_list[$ingredient] += $quantity; // Sum quantities of the same ingredient
+        } else {
+            $ingredient_list[$ingredient] = $quantity;
+        }
+    }
+
+    // Extract recipes from raw_recipes using recipe IDs in shopping list
+    foreach ($shopping_list_data['recipes'] as $recipe_id) {
+        if (isset($shopping_list_data['raw_recipes'][$recipe_id])) {
+            $shopping_list_recipes[] = $shopping_list_data['raw_recipes'][$recipe_id]; // Store recipe data
+        }
+    }
 } else {
     echo "Failed to load shopping list. Error: ";
     var_dump($shopping_list_response); // Debug output
     exit();
-}
+} 
 ?>
 
 <!DOCTYPE html>
@@ -61,7 +108,7 @@ if (isset($shopping_list_response['code']) && $shopping_list_response['code'] ==
     <div class="row">
         <!-- Ingredient List on the left -->
         <div class="col-md-6 shopping-list-box">
-            <h4>Ingredients</h4>
+            <h4>Ingredients to Buy</h4>
             <ul class="list-group">
                 <?php if (!empty($ingredient_list)): ?>
                     <?php foreach ($ingredient_list as $ingredient => $quantity): ?>
@@ -79,26 +126,15 @@ if (isset($shopping_list_response['code']) && $shopping_list_response['code'] ==
         <div class="col-md-6 recipe-list-box">
             <h4>Included Recipes</h4>
             <ul class="list-group">
-                <?php if (!empty($shopping_list_recipes)): ?>
-                    <?php foreach ($shopping_list_recipes as $recipe_id): ?>
-                        <!-- Fetch recipe details for each recipe in the list -->
-                        <?php 
-                        $recipe_data = api_request_with_token("api/recipes/$recipe_id");
-                        if (isset($recipe_data['data'])): 
-                        ?>
-                            <li class="list-group-item">
-                                <?php echo htmlspecialchars($recipe_data['data']['name']); ?>
-                            </li>
-                        <?php else: ?>
-                            <li class="list-group-item">Recipe not found.</li>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <li class="list-group-item">No recipes in the shopping list.</li>
-                <?php endif; ?>
+                <?php foreach ($shopping_list_recipes as $recipe): ?>
+                    <li class="list-group-item">
+                        <?php echo htmlspecialchars($recipe['name']); ?>
+                    </li>
+                <?php endforeach; ?>
             </ul>
         </div>
     </div>
 </div>
+
 </body>
 </html>
