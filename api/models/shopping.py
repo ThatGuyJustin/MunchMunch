@@ -1,8 +1,8 @@
-from mongoengine import Document, IntField, ObjectIdField, ListField, DictField
+from mongoengine import Document, IntField, ListField, DictField, StringField
 
 
 # TODO: Shopping List Models
 class ShoppingList(Document):
     user = IntField(primary_key=True)
-    recipes = ListField(ObjectIdField(), default=[])
+    recipes = ListField(StringField(), default=[])
     ingredients = DictField(default={})
