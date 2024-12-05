@@ -1,7 +1,7 @@
 import datetime
 import json
 
-from flask import Blueprint, request
+from flask import Blueprint, request, redirect
 from mongoengine import DoesNotExist
 
 from models.history import History
@@ -302,3 +302,60 @@ def patch_meal_plan(user, uid):
     slist.reload()
 
     return {"code": 200, "data": json.loads(slist.to_json()), "msg": None}, 200
+
+@users.route("/testing", methods=["GET", "POST"])
+def upload_file():
+    if request.method == "POST":
+        if request.form.get("id"):
+            uid = int(request.form.get("id"))
+
+            user = User_model.get_or_none(User_model.id == uid)
+            user.username = request.form.get("username")
+            user.bio = request.form.get("bio")
+            user.name = request.form.get("name")
+            user.email = request.form.get("email")
+            user.favorite_posts = request.form.get("favorite_posts")
+            user.following = request.form.get("following")
+            user.followers = request.form.get("followers")
+            user.save()
+            return redirect(request.url)
+
+        User_model.create(label=request.form.get("label"), emoji=request.form.get("emoji"), color=request.form.get("color"))
+        return redirect(request.url)
+
+    user_id = request.args.get('id', None)
+    user_to_modify = {}
+    if user_id:
+        user_to_modify = User_model.get_or_none(User_model.id == user_id)
+        if user_to_modify:
+            user_to_modify = user_to_modify.to_dict()
+        else:
+            user_to_modify = {}
+    return f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>User Testing</title>
+        </head>
+        <body>
+          <h1>Create/Modify User</h1>
+          <form method=post enctype=multipart/form-data>
+            ID <input type=text name=id value="{user_to_modify.get('id', '')}" readonly><br>
+            Username <input type=text name=username value="{user_to_modify.get('username', "")}"><br>
+            Bio <input type=text name=bio value="{user_to_modify.get('bio', "")}"><br>
+            Name <input type=text name=name value="{user_to_modify.get('name', "")}"><br>
+            Created At <input type=text name=created_at value="{user_to_modify.get('created_at', "")}"><br>
+            Email <input type=text name=email value="{user_to_modify.get('email', "")}"><br>
+            Account Flags <input type=text name=account_flags value="{user_to_modify.get('account_flags', "")}" readonly><br>
+            Favorite Posts <input type=text name=favorite_posts value="{user_to_modify.get('favorite_posts', "")}"><br>
+            Avatar <input type=text name=avatar value="{user_to_modify.get('avatar', "")}"><br>
+            Following <input type=text name=following value="{user_to_modify.get('following', "")}"><br>
+            Followers <input type=text name=followers value="{user_to_modify.get('followers', "")}"><br>
+            Preferences <input type=text name=preferences value="{user_to_modify.get('preferences', "")}" readonly><br>
+            <input type=submit value=Create/Edit>
+          </form>
+        </body>
+        </html>
+        """

@@ -14,7 +14,7 @@ from util.auth import authed, can_do_admin_requests
 recipes = Blueprint('recipes', __name__)
 
 
-@recipes.post('/')
+@recipes.post('')
 @authed
 def post_recipe(user):
     _FIELDS = ["user", "title", "description", "steps", "ingredients", "time_to_cook", "time_to_prepare", "skill_level"]

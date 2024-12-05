@@ -6,7 +6,7 @@ from util.auth import authed
 tags = Blueprint('tags', __name__)
 
 
-@tags.get("/")
+@tags.get("")
 def get_tags():
     base_query = None
     if 'query' in request.args:
