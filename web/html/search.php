@@ -11,17 +11,15 @@ if (!isset($_SESSION['user_id'])) {
 
 $is_error = false;
 
-// Initialize search parameters
-$type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'recipe'; // Default to "recipe"
+$type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'recipe'; 
 $query = isset($_GET['query']) ? htmlspecialchars($_GET['query']) : '';
 $ingredients = isset($_GET['ingredients']) ? htmlspecialchars($_GET['ingredients']) : '';
 
 // Adjust type for recipes
 if ($type === 'recipes') {
-    $type = 'recipe'; // Convert "recipes" to "recipe"
+    $type = 'recipe'; 
 }
 
-// Build API endpoint based on input
 $api_path_search = "api/search?type=$type";
 if ($query) $api_path_search .= "&query=$query";
 if ($ingredients) $api_path_search .= "&ingredients=$ingredients";
@@ -90,27 +88,33 @@ if ($response['code'] != 200) {
         }
         .results {
             margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
         }
-        .result-item {
-            display: flex;
-            align-items: center;
-            background-color: #f1f1f1;
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
+        .result-card {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
         }
-        .result-item img {
-            width: 50px;
-            height: 50px;
-            margin-right: 15px;
-            border-radius: 5px;
+        .result-card img {
+            width: 100%;
+            height: 150px;
             object-fit: cover;
         }
-        .result-item p {
-            margin: 0;
+        .result-card .card-body {
+            padding: 10px;
+        }
+        .result-card a {
+            text-decoration: none;
+            color: #007bff;
             font-weight: bold;
-            color: #333;
+        }
+        .result-card a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -150,13 +154,26 @@ if ($response['code'] != 200) {
                 <p>No results found.</p>
             <?php else: ?>
                 <?php foreach ($search_results as $item): ?>
-                    <div class="result-item">
-                        <?php if ($type === 'recipe'): ?>
-                            <img src="<?php echo $item['image'] ?? 'default-recipe.png'; ?>" alt="<?php echo htmlspecialchars($item['title']); ?>">
-                            <p><?php echo htmlspecialchars($item['title']); ?></p>
-                        <?php else: ?>
-                            <p><?php echo htmlspecialchars($item['name']); ?></p>
-                        <?php endif; ?>
+                    <div class="result-card">
+                        <?php
+                        if (strpos($item['id'], 'sp_') === 0) {
+                            // Spoonacular recipe
+                            $image_url = $item['media']['main'][0] ?? 'default-recipe.png';
+                        } else {
+                            // Regular recipe
+                            $image_url = $item['image'] ?? 'default-recipe.png';
+                        }
+                        ?>
+                        <img src="<?php echo htmlspecialchars($image_url); ?>" alt="<?php echo htmlspecialchars($item['title'] ?? $item['name']); ?>">
+                        <div class="card-body">
+                            <?php if ($type === 'recipe'): ?>
+                                <a href="recipe.php?id=<?php echo htmlspecialchars($item['id']); ?>">
+                                    <?php echo htmlspecialchars($item['title']); ?>
+                                </a>
+                            <?php else: ?>
+                                <p><?php echo htmlspecialchars($item['name']); ?></p>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>

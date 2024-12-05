@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="message error-message"><?php echo htmlspecialchars($error_message); ?></div>
         <?php endif; ?>
 
-        <form method="post" enctype="multipart/form-data"> <!-- Add enctype for file upload -->
+        <form method="post" enctype="multipart/form-data"> 
             <label for="title">Recipe Title:</label>
             <input type="text" name="title" id="title" required>
 
@@ -195,13 +195,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="number" id="ingredient-quantity" placeholder="e.g., 2">
 
             <label for="ingredient-unit">Unit:</label>
-            <select id="ingredient-unit">
-                <option value="cups">Cups</option>
-                <option value="teaspoons">Teaspoons</option>
-                <option value="tablespoons">Tablespoons</option>
-                <option value="grams">Grams</option>
-                <option value="liters">Liters</option>
-            </select>
+                <select id="ingredient-unit">
+                  <!-- Volume -->
+                 <option value="cups">Cups</option>
+                  <option value="milliliters">Milliliters</option>
+                  <option value="liters">Liters</option>
+                     <option value="teaspoons">Teaspoons</option>
+                     <option value="tablespoons">Tablespoons</option>
+                    <option value="fluid_ounces">Fluid Ounces</option>
+                     <option value="pints">Pints</option>
+                    <option value="quarts">Quarts</option>
+                    <option value="gallons">Gallons</option>
+
+                    <!-- Weight -->
+                    <option value="grams">Grams</option>
+                    <option value="kilograms">Kilograms</option>
+                     <option value="ounces">Ounces</option>
+                  <option value="pounds">Pounds</option>
+
+                    <!-- Length -->
+                     <option value="inches">Inches</option>
+                     <option value="centimeters">Centimeters</option>
+
+                    <!-- Miscellaneous -->
+                    <option value="pinch">Pinch</option>
+                     <option value="dash">Dash</option>
+                    <option value="pieces">Pieces</option>
+                </select>
+
 
             <button type="button" onclick="addIngredient()">Add Ingredient</button>
 
