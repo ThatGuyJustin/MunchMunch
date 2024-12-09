@@ -223,30 +223,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
             </div>
         <?php endif; ?>
 
-        <!-- Add to Shopping List Button (always visible) -->
+        <!-- Add to Shopping List Button -->
         <div class="row mt-5">
             <div class="col-12">
-                <form action="recipe.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+                <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
                     <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
                 </form>
             </div>
         </div>
-<!-- Add to Shopping List Button -->
-<div class="row mt-5">
-    <div class="col-12">
-        <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
-            <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
-        </form>
-    </div>
-</div>
-<!-- Add to Favorites Button -->
-<div class="row mt-5">
-    <div class="col-12">
-        <form action="favhelp.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
-            <button type="submit" name="add_to_favorites" class="btn btn-warning">Add to Favorites</button>
-        </form>
-    </div>
-</div>
+        <!-- Add to Favorites Button -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <form action="favhelp.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+                    <button type="submit" name="add_to_favorites" class="btn btn-warning">Add to Favorites</button>
+                </form>
+            </div>
+        </div>
         <!-- Display existing reviews -->
         <div class="row mt-5">
             <div class="col-12">

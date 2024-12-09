@@ -21,7 +21,7 @@ if ($type === 'recipes') {
 }
 
 $api_path_search = "api/search?type=$type";
-if ($query) $api_path_search .= "&query=$query";
+if ($query) $api_path_search .= "&query=" . urlencode($query);
 if ($ingredients) $api_path_search .= "&ingredients=$ingredients";
 
 $search_results = [];
@@ -164,14 +164,22 @@ if ($response['code'] != 200) {
                             $image_url = $item['image'] ?? 'default-recipe.png';
                         }
                         ?>
-                        <img src="<?php echo htmlspecialchars($image_url); ?>" alt="<?php echo htmlspecialchars($item['title'] ?? $item['name']); ?>">
+                        <?php if ($type === 'recipe'): ?>
+                            <img src="<?php echo htmlspecialchars($image_url); ?>" alt="<?php echo htmlspecialchars($item['title'] ?? $item['name']); ?>">
+                        <?php else: ?>
+                            <img src="<?php echo htmlspecialchars("/api/media/avatars/" . $item['id'] . "/avatar.png"); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                        <?php endif; ?>
+                        <!-- <img src="<?php echo htmlspecialchars($image_url); ?>" alt="<?php echo htmlspecialchars($item['title'] ?? $item['name']); ?>"> -->
                         <div class="card-body">
                             <?php if ($type === 'recipe'): ?>
                                 <a href="recipe.php?id=<?php echo htmlspecialchars($item['id']); ?>">
                                     <?php echo htmlspecialchars($item['title']); ?>
                                 </a>
                             <?php else: ?>
-                                <p><?php echo htmlspecialchars($item['name']); ?></p>
+                                <a href="profile.php?user=<?php echo htmlspecialchars($item['username']); ?>">
+                                    <?php echo htmlspecialchars($item['name']); ?>
+                                </a>
+                                <!-- <p><?php echo htmlspecialchars($item['name']); ?></p> -->
                             <?php endif; ?>
                         </div>
                     </div>

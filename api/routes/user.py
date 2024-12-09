@@ -150,13 +150,18 @@ def get_user_favorites(user, uid):
 
     to_return = []
     for fav in u.favorite_posts:
-        recipe = Post.objects(id=fav).get()
-        base_json = json.loads(recipe.to_json())
-        base_json['id'] = base_json["_id"]["$oid"]
-        formatted = recipe.created_at.strftime("%m.%d.%Y %H:%M")
-        base_json['created_at'] = formatted
-        del base_json['_id']
-        to_return.append(base_json)
+        if fav.startswith('sp_'):
+            rcode, recipe = make_spoonacular_api_call(f"recipes/{fav[3:]}/information", "get")
+            #  = spoonacular_api_to_internal(recipe)
+            to_return.append(spoonacular_api_to_internal(recipe))
+        else:
+            recipe = Post.objects(id=fav).get()
+            base_json = json.loads(recipe.to_json())
+            base_json['id'] = base_json["_id"]["$oid"]
+            formatted = recipe.created_at.strftime("%m.%d.%Y %H:%M")
+            base_json['created_at'] = formatted
+            del base_json['_id']
+            to_return.append(base_json)
 
     return {"code": 200, "data": to_return, "msg": None}, 200
 
@@ -190,11 +195,12 @@ def get_history(user, uid):
         query = query.skip(offset)
 
     to_return = []
+    sp_recipes = []
 
     for history_obj in query:
 
         base_json = json.loads(history_obj.to_json())
-        base_json['recipe'] = base_json["recipe"]["$oid"]
+        # base_json['recipe'] = base_json["recipe"]["$oid"]
         base_json['id'] = base_json["_id"]
         bformatted = history_obj.timestamp.strftime("%m.%d.%Y %H:%M")
         base_json['timestamp'] = bformatted
@@ -287,7 +293,7 @@ def get_meal_plan(user, uid):
     try:
         slist = MealPlan.objects.get(user=user.id)
     except DoesNotExist:
-        slist = ShoppingList(plan=[], user=uid).save()
+        slist = MealPlan(plan=[], user=uid).save()
 
     return {"code": 200, "data": json.loads(slist.to_json()), "msg": None}, 200
 

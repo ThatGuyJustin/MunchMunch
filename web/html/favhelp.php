@@ -24,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_favorites'])) 
         $favorites = isset($user_data['favorite_posts']) ? $user_data['favorite_posts'] : [];
 
         // Add the current recipe to favorites if it's not already in the list
-        if (!in_array($recipe_id, $favorites)) {
-            $favorites[] = $recipe_id;
+        if (!in_array($_POST['add_to_favorites'], $favorites)) {
+            array_push($favorites, $_POST['add_to_favorites']);
         }
 
         // Send the updated favorites list to the API
@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_favorites'])) 
     } else {
         $error_message = "Failed to retrieve user data.";
     }
+    header('Location: recipe.php?id=' . $_POST['add_to_favorites']);
 }
 ?>
 
