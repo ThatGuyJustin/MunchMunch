@@ -223,20 +223,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
             </div>
         <?php endif; ?>
 
-        <!-- Add to Shopping List Button (always visible) -->
+        <!-- Add to Shopping List Button -->
         <div class="row mt-5">
             <div class="col-12">
-                <form action="recipe.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+                <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
                     <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
                 </form>
             </div>
         </div>
-<!-- Add to Shopping List Button -->
-<div class="row mt-5">
-    <div class="col-12">
-        <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
-            <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
-        </form>
+        <!-- Add to Favorites Button -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <form action="favhelp.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+                    <button type="submit" name="add_to_favorites" class="btn btn-warning">Add to Favorites</button>
+                </form>
+            </div>
+        </div>
+        <!-- Display existing reviews -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3>User Reviews</h3>
+                <?php if (!empty($reviews)): ?>
+                    <div class="list-group">
+                        <?php foreach ($reviews as $review): ?>
+                            <div class="list-group-item">
+                                <h5><?php echo htmlspecialchars($review["user"]["name"]); ?></h5> <!-- User name from backend -->
+                                <p><?php echo htmlspecialchars($review["comment"]); ?></p>
+                                <p><strong>Rating:</strong> <?php echo htmlspecialchars($review["rating"]); ?> stars</p>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p>No reviews yet. Be the first to leave a review!</p>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </div>
 <!-- Add to Favorites Button -->

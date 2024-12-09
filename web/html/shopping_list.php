@@ -86,7 +86,6 @@ if (isset($update_response['code']) && $update_response['code'] === 200) {
     header("Refresh:0; url=shopping_list.php");
 } else {
     echo "Failed to update shopping list. Error: ";
-  // var_dump($update_response);
     exit();
 }
    }
@@ -118,14 +117,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_recipe_id'])) 
 
             $api_path_recipe = "api/recipes/$delete_recipe_id";
             $recipe_response = api_request_with_token($api_path_recipe);
-            var_dump($recipe_response);
             
     if (isset($recipe_response['code']) && $recipe_response['code'] === 200) 
     {
 
             $recipe_response_data=$recipe_response['data'];
             $recipe_ingredients = $recipe_response_data['ingredients'];
-            var_dump($curr_ingredients);
 
         foreach ($recipe_ingredients as $ingredient => $quantity) {
             if (isset($curr_ingredients[$ingredient])) {

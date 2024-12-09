@@ -20,7 +20,11 @@ if (!isset($recipe['data'])) {
 $recipe = $recipe["data"];
 
 // Fetch the user who created the recipe
-$who_did_it = api_request_with_token("api/users/" . $recipe["user"]);
+if(is_a($recipe["user"], "array")){
+    $who_did_it = $recipe["user"];
+}else{
+    $who_did_it = api_request_with_token("api/users/" . $recipe["user"]);
+}
 
 // Fetch all tags to display in the recipe
 $all_tags = api_request_with_token("api/tags");

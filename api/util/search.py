@@ -36,8 +36,6 @@ def search_recipes(request_args):
             params['query'] = general_name_query
         params['number'] = 50 - len(to_return)
         rcode, data = make_spoonacular_api_call("recipes/complexSearch", "get", params=params)
-        print(rcode)
-        print(data)
         for recipe in data['results']:
             to_return.append(spoonacular_api_to_internal(recipe))
 

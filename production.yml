@@ -7,6 +7,7 @@ services:
     image: trafex/php-nginx:latest
     ports:
       - 80:80
+      - 443:443
     volumes:
       - "./web/html:/var/www/html"
       - "./cfg/nginx:/etc/nginx/conf.d"
