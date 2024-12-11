@@ -12,7 +12,7 @@ if (!is_user_logged_in()) {
 
 $error_message = '';
 $success_message = '';
-
+$days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 // Get the recipe ID from the URL query parameter
 if (!isset($_GET["id"])) {
     echo "Recipe not found.";
@@ -72,7 +72,7 @@ foreach ($recipe["ingredients"] as $key => $value) {
 }
 
 // Handle review submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($recipe_id, 'sp_') !== 0) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($recipe_id, 'sp_') !== 0 && isset($_POST['submit_review'])) {
     $rating = intval($_POST['rating']);
     $comment = trim($_POST['comment']);
 
@@ -112,8 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
     }
 }
 
-?>
 
+?>
 
 
 <!DOCTYPE html>
@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
                             <label for="comment" class="form-label">Comment:</label>
                             <textarea name="comment" class="form-control" rows="4" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                        <button type="submit" name="submit_review" class="btn btn-primary">Submit Review</button>
                     </form>
                 </div>
             </div>
@@ -223,48 +223,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
             </div>
         <?php endif; ?>
 
+        <div class="row mt-5">
+    <div class="col-12 d-flex justify-content-between">
         <!-- Add to Shopping List Button -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
-                    <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
-                </form>
-            </div>
-        </div>
+        <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+            <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
+        </form>
+
         <!-- Add to Favorites Button -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <form action="favhelp.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
-                    <button type="submit" name="add_to_favorites" class="btn btn-warning">Add to Favorites</button>
-                </form>
-            </div>
-        </div>
-        <!-- Display existing reviews -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <h3>User Reviews</h3>
-                <?php if (!empty($reviews)): ?>
-                    <div class="list-group">
-                        <?php foreach ($reviews as $review): ?>
-                            <div class="list-group-item">
-                                <h5><?php echo htmlspecialchars($review["user"]["name"]); ?></h5> <!-- User name from backend -->
-                                <p><?php echo htmlspecialchars($review["comment"]); ?></p>
-                                <p><strong>Rating:</strong> <?php echo htmlspecialchars($review["rating"]); ?> stars</p>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else: ?>
-                    <p>No reviews yet. Be the first to leave a review!</p>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Add to Favorites Button -->
-<div class="row mt-5">
-    <div class="col-12">
         <form action="favhelp.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
             <button type="submit" name="add_to_favorites" class="btn btn-warning">Add to Favorites</button>
+        </form>
+
+        <!-- Add to Meal Plan Button -->
+        <form method="POST" action="add_to_meal_plan.php?id=<?php echo htmlspecialchars($recipe_id); ?>">
+            <button type="submit" name="meal" value="$" class="btn btn-primary">Add to Meal Plan</button>
         </form>
     </div>
 </div>
@@ -288,5 +261,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
             </div>
         </div>
     </div>
+</div>
+
+
+
 </body>
 </html>
