@@ -293,7 +293,7 @@ def get_meal_plan(user, uid):
     try:
         slist = MealPlan.objects.get(user=user.id)
     except DoesNotExist:
-        slist = MealPlan(plan=[], user=uid).save()
+        slist = MealPlan(plan={}, user=uid).save()
 
     return {"code": 200, "data": json.loads(slist.to_json()), "msg": None}, 200
 
