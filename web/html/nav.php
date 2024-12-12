@@ -43,8 +43,8 @@ $NAV_ICONS = '
                     <li><a class="dropdown-item" href="profile.php"><i class="fa-regular fa-user"></i> Profile</a></li>
                     <li><a class="dropdown-item" href="account.php"><i class="fa-regular fa-pen-to-square"></i> Account Editing</a></li>
                     <li><a class="dropdown-item" href="shopping_list.php"><i class="fa-solid fa-cart-shopping"></i> Shopping List</a></li>
+                     <li><a class="dropdown-item" href="meal_plan.php"><i class="fas fa-drumstick-bite"></i></i></i> Meal Plan</a></li>
                     <li><a class="dropdown-item" href="notifications.php"><i class="fa-regular fa-bell"></i> Notifications</a></li>
-                    <li><a class="dropdown-item" href="settings.php"><i class="fa-solid fa-user-gear"></i> Settings</a></li>
                     <li><a class="dropdown-item" href="recipeform.php"><i class="fa-regular fa-clipboard"></i> Create Recipe</a></li>
                     <li><a class="dropdown-item" href="contact.php"><i class="fa-solid fa-ticket"></i> Contact Admin</a></li>
                     <li><a class="dropdown-item" href="support.php"><i class="fa-solid fa-ticket"></i> Support</a></li>

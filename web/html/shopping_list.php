@@ -133,6 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_recipe_id'])) 
                 }
             }
         }
+        var_dump($curr_ingredients);
     }
 
 
