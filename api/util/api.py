@@ -24,14 +24,16 @@ def make_spoonacular_api_call(path: str, method: str, params: dict = None, data:
     return response.status_code, response.json() if len(response.content) != 0 else None
 
 
-def spoonacular_api_to_internal(spoonacular_recipe):
+def spoonacular_api_to_internal(spoonacular_recipe, debug=False):
+    if debug:
+        print(spoonacular_recipe)
+
     spoonacular_user = {
         "username": "spoonacular",
         "name": "Spoonacular",
         "id": 0,
         "account_flags": ["INTERNAL"],
     }
-
     base_recipe = {
         "id": f"sp_{spoonacular_recipe["id"]}",
         "user": spoonacular_user,
@@ -60,5 +62,8 @@ def spoonacular_api_to_internal(spoonacular_recipe):
         for actual_steps in super_step["steps"]:
             steps.append(actual_steps["step"])
     base_recipe["steps"] = steps
+
+    if debug:
+        print(base_recipe)
 
     return base_recipe

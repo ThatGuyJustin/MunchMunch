@@ -26,21 +26,49 @@ if (!$tickets || !isset($tickets['data']) || count($tickets['data']) === 0) {
 $current_ticket_id = $_GET['ticket_id'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $ticket_id = $_POST['ticket_id'];
-    $response_message = $_POST['response_message'] ?? null;
+    $ticket_id = $_POST['ticket_id'] ?? null; 
 
-    // Post a new response message to the ticket
-    if ($response_message) {
-        $response_data = ['message' => $response_message];
-        $message_response = api_request_with_token("api/admin/requests/$ticket_id/messages", "POST", $response_data);
-        if (isset($message_response['code']) && $message_response['code'] === 200) {
-            $success_message = "Response posted successfully!";
-            // Redirect to refresh the page and display the new response
-            header("Location: support.php?ticket_id=$ticket_id");
-            exit();
-        } else {
-            $error_message = "Failed to post response.";
+    if ($ticket_id) { 
+        $status = $_POST['status'] ?? null;
+        $assigned_to = $_POST['assigned_to'] ?? null;
+        $response_message = $_POST['response_message'] ?? null;
+
+        // Prepare data for updating the ticket
+        $update_data = [];
+        if ($status) $update_data['status'] = $status;
+        if ($assigned_to) $update_data['assigned_to'] = $assigned_to;
+
+        // Update ticket details
+        if (!empty($update_data)) {
+            $update_response = api_request_with_token("api/admin/requests/$ticket_id", "PATCH", $update_data);
+
+            error_log("Update response: " . json_encode($update_response));
+
+            if (isset($update_response['code']) && $update_response['code'] === 200) {
+                $success_message = "Ticket updated successfully!";
+            } else {
+                $error_message = "Failed to update ticket. API Response: " . json_encode($update_response);
+            }
         }
+
+        // Post a new response message to the ticket
+        if ($response_message) {
+            $response_data = ['message' => $response_message];
+            $message_response = api_request_with_token("api/admin/requests/$ticket_id/messages", "POST", $response_data);
+
+            error_log("Message Response: " . json_encode($message_response));
+
+            if (isset($message_response['code']) && $message_response['code'] === 200) {
+                $success_message = "Response posted successfully!";
+                // Redirect to refresh the page and keep the current ticket open
+                header("Location: admin.php?ticket_id=$ticket_id");
+                exit();
+            } else {
+                $error_message = "Failed to post response. API Response: " . json_encode($message_response);
+            }
+        }
+    } else {
+        $error_message = "Ticket ID is missing.";
     }
 }
 ?>
@@ -59,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ticketDetails[i].style.display = 'none';
             }
             document.getElementById('ticket-' + ticketId).style.display = 'block';
+            document.getElementById('ticket-id-update').value = ticketId;
         }
         
         // Function to open the ticket passed 
@@ -169,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="update-ticket-section mt-3">
                         <h5>Update Ticket</h5>
                         <form action="support.php" method="post">
-                            <input type="hidden" name="ticket_id" id="ticket-id-update">
+                            <input type="hidden" name="ticket_id" id="ticket-id-update" value="">
 
                             <div class="mb-3">
                                 <label for="status-update" class="form-label">Update Status:</label>
@@ -181,9 +210,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <div class="mb-3">
-                                <label for="assigned-to-update" class="form-label">Assign to:</label>
-                                <input type="text" name="assigned_to" id="assigned-to-update" class="form-control" placeholder="Enter assignee name">
-                            </div>
+                            <label for="assigned-to-update" class="form-label">Assign to:</label>
+                            <select name="assigned_to" id="assigned-to-update" class="form-select">
+                                <option value="null"></option>
+                                <?php foreach (api_request_with_token("api/search?type=admins")["data"] as $admin): ?>
+                                    <option value="<?php echo htmlspecialchars($admin["id"]); ?>">
+                                        <?php echo htmlspecialchars($admin["username"]); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
                             <button type="submit" class="btn btn-primary">Update Ticket</button>
                         </form>

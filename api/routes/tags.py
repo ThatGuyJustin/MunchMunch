@@ -22,7 +22,6 @@ def get_tags():
 @tags.route("/testing", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
-        print(request.form.to_dict().items())
         if request.form.get("id"):
             tid = int(request.form.get("id"))
 

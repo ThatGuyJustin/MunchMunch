@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $profile = "self";
 
-if(!$_GET["user"]){
+if(!isset($_GET["user"])){
     $profile = "self";
 }else{
     $profile = $_GET["user"];
@@ -138,78 +138,77 @@ $profile_image_url = "/api/media/avatars/" . $user['id'] . "/" . "avatar.png";
                     <div class="card-body">
                         <!-- Tab Content -->
                         <div class="tab-content" id="recipeTabContent">
-                         <!-- Recipes Uploaded Tab -->
-<div class="tab-pane fade show active" id="uploaded" role="tabpanel" aria-labelledby="uploaded-tab">
-    <ul class="list-group list-group-flush">
-        <?php if (!empty($uploaded_recipes)): ?>
-            <?php foreach ($uploaded_recipes as $recipe): ?>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></a></strong> 
-                        <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Uploaded on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
-                    </div>
-                    <!-- Shopping Cart Button -->
-                     <form action ="shopping_list.php?id=<?php echo htmlspecialchars($recipe['id']);?>" method = "post">
-                    <button class="btn btn-outline-primary btn-sm" type="submit" name="add_to_shopping_list">
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
-            </form>
-                </li>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <li class="list-group-item">No recipes uploaded yet.</li>
-        <?php endif; ?>
-    </ul>
-</div>
+                            <!-- Recipes Uploaded Tab -->
+                            <div class="tab-pane fade show active" id="uploaded" role="tabpanel" aria-labelledby="uploaded-tab">
+                                <ul class="list-group list-group-flush">
+                                    <?php if (!empty($uploaded_recipes)): ?>
+                                        <?php foreach ($uploaded_recipes as $recipe): ?>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></a></strong> 
+                                                    <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Uploaded on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
+                                                </div>
+                                                <!-- Shopping Cart Button -->
+                                                <form action ="shopping_list.php?id=<?php echo htmlspecialchars($recipe['id']);?>" method = "post">
+                                                <button class="btn btn-outline-primary btn-sm" type="submit" name="add_to_shopping_list">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </button>
+                                        </form>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <li class="list-group-item">No recipes uploaded yet.</li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
 
-                         <!-- Recipes Favorited Tab -->
-<div class="tab-pane fade" id="favorited" role="tabpanel" aria-labelledby="favorited-tab">
-    <ul class="list-group list-group-flush">
-        <?php if (!empty($favorited_recipes)): ?>
-            <?php foreach ($favorited_recipes as $recipe): ?>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['id']); ?>"><?php echo htmlspecialchars($recipe['title']); ?></strong> 
-                        <span class="text-muted"><?php if($recipe['created_at'] != '') echo("(Favorited on " . htmlspecialchars($recipe['created_at'] . ")")); ?></span>
-                    </div>
-                    <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe['id']); ?>" method="post">
-                        <button class="btn btn-outline-primary btn-sm" type="submit" name="add_to_shopping_list" data-bs-toggle="tooltip" title="Add to your shopping list">
-                            <i class="fas fa-shopping-cart"></i>
-                        </button>
-                    </form>
-                </li>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <li class="list-group-item">No recipes favorited yet.</li>
-        <?php endif; ?>
-    </ul>
-</div>
-<!-- Viewed Recipes (History) -->
-<?php if ($_SESSION["user_id"] == $user["id"]): ?>
-    <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
-        <ul class="list-group list-group-flush">
-            <?php if (!empty($viewed_recipes)): ?>
-                <?php foreach ($viewed_recipes as $recipe): ?>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['recipe']['id']); ?>"><?php echo htmlspecialchars($recipe['recipe']['title']); ?></a></strong>
-                            <span class="text-muted">(Viewed on <?php echo htmlspecialchars($recipe['timestamp']); ?>)</span>
-                        </div>
-                        <!-- Add to Shopping Cart Button -->
-                        <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe['recipe']['id']); ?>" method="post">
-                            <button class="btn btn-outline-primary btn-sm" type="submit" name="add_to_shopping_list" data-bs-toggle="tooltip" title="Add to your shopping list">
-                                <i class="fas fa-shopping-cart"></i>
-                            </button>
-                        </form>
-                    </li>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <li class="list-group-item">No recently viewed recipes.</li>
-            <?php endif; ?>
-        </ul>
-    </div>
-<?php endif; ?>
-                        </div> 
+                            <!-- Recipes Favorited Tab -->
+                            <div class="tab-pane fade" id="favorited" role="tabpanel" aria-labelledby="favorited-tab">
+                                <ul class="list-group list-group-flush">
+                                    <?php if (!empty($favorited_recipes["favorites"])): ?>
+                                        <?php foreach ($favorited_recipes["favorites"] as $recipe): ?>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe); ?>"><?php echo htmlspecialchars($favorited_recipes["raw_recipes"][$recipe]['title']); ?></strong> 
+                                                    <span class="text-muted"><?php if($favorited_recipes["raw_recipes"][$recipe]['created_at'] != '') echo("(Favorited on " . htmlspecialchars($favorited_recipes["raw_recipes"][$recipe]['created_at'] . ")")); ?></span>
+                                                </div>
+                                                <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe); ?>" method="post">
+                                                    <button class="btn btn-outline-primary btn-sm" type="submit" name="add_to_shopping_list" data-bs-toggle="tooltip" title="Add to your shopping list">
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <li class="list-group-item">No recipes favorited yet.</li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
+                            <!-- Viewed Recipes (History) -->
+                            <?php if ($_SESSION["user_id"] == $user["id"]): ?>
+                                <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+                                    <ul class="list-group list-group-flush">
+                                        <?php if (!empty($viewed_recipes["history"])): ?>
+                                            <?php foreach ($viewed_recipes["history"] as $recipe): ?>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong><a href="/recipe.php?id=<?php echo htmlspecialchars($recipe['recipe']); ?>"><?php echo htmlspecialchars($viewed_recipes["raw_recipes"][$recipe['recipe']]['title']); ?></a></strong>
+                                                        <span class="text-muted">(Viewed on <?php echo htmlspecialchars($recipe['timestamp']); ?>)</span>
+                                                    </div>
+                                                    <!-- Add to Shopping Cart Button -->
+                                                    <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe['recipe']); ?>" method="post">
+                                                        <button class="btn btn-outline-primary btn-sm" type="submit" name="add_to_shopping_list" data-bs-toggle="tooltip" title="Add to your shopping list">
+                                                            <i class="fas fa-shopping-cart"></i>
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <li class="list-group-item">No recently viewed recipes.</li>
+                                        <?php endif; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

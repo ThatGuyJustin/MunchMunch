@@ -148,12 +148,13 @@ def get_user_favorites(user, uid):
     if "PRIVATE_FAVORITES" in u.account_flags and not can_do_admin_requests(user) and int(uid) != int(user.id):
         return {"code": 403, "data": {}, "msg": "User's Favorites Are Private."}, 403
 
+    raw_recipes = {}
     to_return = []
+    sp_recipes = []
     for fav in u.favorite_posts:
         if fav.startswith('sp_'):
-            rcode, recipe = make_spoonacular_api_call(f"recipes/{fav[3:]}/information", "get")
-            #  = spoonacular_api_to_internal(recipe)
-            to_return.append(spoonacular_api_to_internal(recipe))
+            sp_recipes.append(fav[3:])
+            to_return.append(fav)
         else:
             recipe = Post.objects(id=fav).get()
             base_json = json.loads(recipe.to_json())
@@ -161,9 +162,23 @@ def get_user_favorites(user, uid):
             formatted = recipe.created_at.strftime("%m.%d.%Y %H:%M")
             base_json['created_at'] = formatted
             del base_json['_id']
-            to_return.append(base_json)
+            to_return.append(fav)
+            raw_recipes[fav] = base_json
 
-    return {"code": 200, "data": to_return, "msg": None}, 200
+    if len(sp_recipes):
+        rcode, all_recipes = make_spoonacular_api_call(f"recipes/informationBulk", "get", params={"ids": ",".join(sp_recipes)})
+        if rcode != 429:
+            for recipe in all_recipes:
+                raw_recipes[f"sp_{recipe['id']}"] = spoonacular_api_to_internal(recipe)
+        else:
+            to_return = [recipe for recipe in to_return if not recipe.startswith('sp_')]
+
+    data = {
+        "favorites": to_return,
+        "raw_recipes": raw_recipes,
+    }
+
+    return {"code": 200, "data": data, "msg": None}, 200
 
 
 @users.post("/<uid>/history")
@@ -194,6 +209,7 @@ def get_history(user, uid):
     if offset is not None:
         query = query.skip(offset)
 
+    raw_recipes = {}
     to_return = []
     sp_recipes = []
 
@@ -206,8 +222,7 @@ def get_history(user, uid):
         base_json['timestamp'] = bformatted
         del base_json['_id']
         if base_json['recipe'].startswith('sp_'):
-            rcode, recipe = make_spoonacular_api_call(f"recipes/{base_json['recipe'][3:]}/information", "get")
-            base_json['recipe'] = spoonacular_api_to_internal(recipe)
+            sp_recipes.append(base_json['recipe'][3:])
         else:
             r = Post.objects(id=base_json['recipe']).get()
             recipe_json = json.loads(r.to_json())
@@ -215,10 +230,24 @@ def get_history(user, uid):
             formatted = r.created_at.strftime("%m.%d.%Y %H:%M")
             recipe_json['created_at'] = formatted
             del recipe_json['_id']
-            base_json['recipe'] = recipe_json
+            raw_recipes[history_obj['recipe']] = recipe_json
         to_return.append(base_json)
 
-    return {"code": 200, "data": to_return, "msg": None}, 200
+    if len(sp_recipes):
+        rcode, all_recipes = make_spoonacular_api_call(f"recipes/informationBulk", "get",
+                                                       params={"ids": ",".join(sp_recipes)})
+        if rcode != 429:
+            for recipe in all_recipes:
+                raw_recipes[f"sp_{recipe['id']}"] = spoonacular_api_to_internal(recipe)
+        else:
+            to_return = [recipe for recipe in to_return if not recipe.startswith('sp_')]
+
+    data = {
+        "history": to_return,
+        "raw_recipes": raw_recipes,
+    }
+
+    return {"code": 200, "data": data, "msg": None}, 200
 
 
 @users.post("/<uid>/shopping-list")
@@ -255,9 +284,13 @@ def get_shopping_list(user, uid):
             raw_ids.append(recipe)
 
     if len(sp_recipes):
-        rcode, all_recipes = make_spoonacular_api_call(f"recipes/informationBulk", "get", params={"ids": ",".join(sp_recipes)})
-        for recipe in all_recipes:
-            raw_recipes[f"sp_{recipe['id']}"] = spoonacular_api_to_internal(recipe)
+        rcode, all_recipes = make_spoonacular_api_call(f"recipes/informationBulk", "get",
+                                                       params={"ids": ",".join(sp_recipes)})
+        if rcode != 429:
+            for recipe in all_recipes:
+                raw_recipes[f"sp_{recipe['id']}"] = spoonacular_api_to_internal(recipe)
+        else:
+            to_return = [recipe for recipe in raw_ids if not recipe.startswith('sp_')]
 
     shopping_list = json.loads(slist.to_json())
     shopping_list['raw_recipes'] = raw_recipes

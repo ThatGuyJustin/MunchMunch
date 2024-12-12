@@ -181,7 +181,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="mb-3">
                             <label for="assigned-to-update" class="form-label">Assign to:</label>
-                            <input type="text" name="assigned_to" id="assigned-to-update" class="form-control" placeholder="Enter assignee name">
+                            <select name="assigned_to" id="assigned-to-update" class="form-select">
+                                <?php foreach (api_request_with_token("api/search?type=admins")["data"] as $admin): ?>
+                                    <option value="<?php echo htmlspecialchars($admin["id"]); ?>"><?php echo htmlspecialchars($admin["name"]); ?>(<?php echo htmlspecialchars($admin["username"]); ?>)</option>
+                                <?php endforeach; ?>  
+                            <!-- <option value="open">Open</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="closed">Closed</option> -->
+
+                            </select>
+                            <!-- <input type="text" name="assigned_to" id="assigned-to-update" class="form-control" placeholder="Enter assignee name"> -->
                         </div>
 
                         <button type="submit" class="btn btn-primary">Update Ticket</button>

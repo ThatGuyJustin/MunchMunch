@@ -273,8 +273,8 @@ def recommended_recipe(user):
 
     ranked = sorted(rated_recipes, key=lambda x: x[1], reverse=True)
 
-    for ranked_recipe in ranked:
-        print(f"{ranked_recipe[0]["title"]}: {ranked_recipe[1]}")
+    # for ranked_recipe in ranked:
+    #     print(f"{ranked_recipe[0]["title"]}: {ranked_recipe[1]}")
 
     return {'code': 200, 'data': ranked[0][0], 'msg': "Random Recipe"}, 200
 
@@ -290,7 +290,6 @@ def spoonacular_recipe(user):
 @recipes.route("/testing", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
-        print(request.form.to_dict().items())
         if request.form.get("id"):
             new_data = request.form.to_dict()
             rid = request.form.get("id")

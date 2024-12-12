@@ -224,23 +224,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
         <?php endif; ?>
 
         <div class="row mt-5">
-    <div class="col-12 d-flex justify-content-between">
-        <!-- Add to Shopping List Button -->
-        <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
-            <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
-        </form>
+            <div class="col-12 d-flex justify-content-between">
+                <!-- Add to Shopping List Button -->
+                <form action="shopping_list.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
+                    <button type="submit" name="add_to_shopping_list" class="btn btn-success">Add to Shopping List</button>
+                </form>
 
-        <!-- Add to Favorites Button -->
-        <form action="favhelp.php?id=<?php echo htmlspecialchars($recipe_id); ?>" method="post">
-            <button type="submit" name="add_to_favorites" class="btn btn-warning">Add to Favorites</button>
-        </form>
+                <!-- Add to Favorites Button -->
+                <!-- <form> -->
+                <button id="favorite_button" onclick="add_to_favorites()" class="btn btn-warning">Add to Favorites</button>
+                <!-- </form> -->
 
-        <!-- Add to Meal Plan Button -->
-        <form method="POST" action="add_to_meal_plan.php?id=<?php echo htmlspecialchars($recipe_id); ?>">
-            <button type="submit" name="meal" value="$" class="btn btn-primary">Add to Meal Plan</button>
-        </form>
-    </div>
-</div>
+                <!-- Add to Meal Plan Button -->
+                <form method="POST" action="add_to_meal_plan.php?id=<?php echo htmlspecialchars($recipe_id); ?>">
+                    <button type="submit" name="meal" value="$" class="btn btn-primary">Add to Meal Plan</button>
+                </form>
+            </div>
+        </div>
         <!-- Display existing reviews -->
         <div class="row mt-5">
             <div class="col-12">
@@ -262,8 +262,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_shopping_list'
         </div>
     </div>
 </div>
-
-
-
+<script>
+        function add_to_favorites()
+        {
+            document.getElementById('favorite_button').innerHTML = "Saved!";
+            document.getElementById('favorite_button').style.background='#6beb34';
+            fetch("api/users/favorites/" + "<?php echo htmlspecialchars($recipe_id); ?>", {
+                method: "PUT",
+                headers: {
+                    'Authorization': 'Bearer ' + '<?php echo htmlspecialchars($_SESSION["token"]); ?>'
+                }
+            });
+        }
+</script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 <?php
 require_once 'util.php'; // Include utility functions
+require_once 'nav.php';
 
 // Enable error reporting for debugging
 ini_set('display_errors', 1);
@@ -164,10 +165,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     </style>
+    <link rel="stylesheet" href="css/styles.css">
+    <?php echo($NAV_HEADERS) ?>
 </head>
 <body>
-
-<?php include 'nav.php'; ?> 
+    <?php echo($NAV_ICONS) ?>
     <div class="container">
         <h1>Upload a Recipe</h1>
 
@@ -185,8 +187,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="description">Description:</label>
             <textarea name="description" id="description" rows="4" required></textarea>
 
-            <label for="tags">Tags (comma-separated IDs):</label>
-            <input type="text" name="tags" id="tags" placeholder="e.g., 1,2,3" required>
+            <label for="tags">Tags:</label>
+            <!-- <input type="text" name="tags" id="tags" placeholder="e.g., 1,2,3" required> -->
+            <select name="tags" id="tags" multiple>
+                <?php foreach (api_request_with_token("api/tags") as $tag): ?>
+                    <option value="<?php echo htmlspecialchars($tag["id"]); ?>">
+                        <?php echo htmlspecialchars($tag["emoji"] . " " . $tag["label"]); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
             <label for="ingredient-name">Ingredient Name:</label>
             <input type="text" id="ingredient-name" placeholder="e.g., Water">
