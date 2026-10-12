@@ -34,6 +34,3 @@ FoodTinder bridges these gaps with a user-friendly platform offering the followi
 - Review and feedback system for community interaction
 - Admin support for issue reporting and category suggestions
 
-
-Access the system- 
-https://munchmunch.fatyoshi.dev/
